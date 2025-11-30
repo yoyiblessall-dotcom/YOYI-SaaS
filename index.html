@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祐逸 YOYI | Gesture OS</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 
     <style>
         /* --- 0. 基礎設定 --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         html, body {
             margin: 0; height: 100%; overflow: hidden; /* 隱藏捲軸，全手勢操作 */
@@ -34,6 +34,7 @@
         .login-btn {
             pointer-events: auto; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-size: 14px; color: #fff; text-decoration: none;
             border: 1px solid rgba(255,255,255,0.3); padding: 8px 24px; border-radius: 50px; background: rgba(0,0,0,0.5); transition: 0.3s;
+            backdrop-filter: blur(5px);
         }
         .login-btn:hover { background: #fff; color: #000; }
 
@@ -54,25 +55,23 @@
             background: radial-gradient(circle at center, #151515 0%, #000 80%);
         }
 
-        /* ★★★ 這裡就是你要的：由小變大，衝擊力滿點 ★★★ */
         .brand-title {
             font-family: 'Orbitron', sans-serif; 
-            font-size: clamp(6rem, 25vw, 18rem); /* 巨大 */
+            font-size: clamp(4rem, 20vw, 18rem); /* 使用 clamp 確保文字縮放 */
             font-weight: 900; line-height: 0.8; margin: 0;
             background: linear-gradient(180deg, #fff 10%, #444 100%); 
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            
-            /* 動畫設定：BigBang */
             opacity: 0; 
             animation: bigBang 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
 
         .gesture-hint {
             position: absolute; bottom: 50px; color: #555; font-size: 14px; letter-spacing: 2px;
-            animation: pulse 2s infinite 1s; /* 延遲 1秒出現，不搶主角戲 */
+            animation: pulse 2s infinite 1s;
             text-transform: uppercase; opacity: 0; animation-fill-mode: forwards;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
-        .gesture-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+        .gesture-icon { font-size: 24px; }
 
         /* --- 4. 第二屏：產品 (Loop) --- */
         .product-section { background: #050505; }
@@ -89,7 +88,10 @@
         .visual-link:hover .visual-frame { transform: scale(1.02); border-color: #fff; }
         .visual-link:hover img { opacity: 1; }
         
-        .product-info h2 { font-family: 'Orbitron', sans-serif; font-size: 4rem; margin-bottom: 20px; text-transform: uppercase; line-height: 1; }
+        .product-info h2 { 
+            font-family: 'Orbitron', sans-serif; font-size: 4rem; margin-bottom: 20px; text-transform: uppercase; line-height: 1;
+            word-break: break-word; /* 防止長單字撐爆手機版 */
+        }
         .product-info p { color: #aaa; font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px; border-left: 2px solid #fff; padding-left: 20px; }
         
         .cta-btn {
@@ -109,18 +111,10 @@
 
         .footer-stamp { position: absolute; bottom: 30px; width: 100%; text-align: center; color: #333; font-size: 12px; font-family: 'Orbitron', monospace; }
 
-        /* --- 動畫定義 (關鍵) --- */
+        /* --- 動畫定義 --- */
         @keyframes bigBang {
-            0% { 
-                opacity: 0; 
-                transform: scale(0.1); /* 從極小開始 */
-                filter: blur(20px);    /* 一開始是模糊的 */
-            }
-            100% { 
-                opacity: 1; 
-                transform: scale(1);   /* 瞬間變大 */
-                filter: blur(0);       /* 變得清晰銳利 */
-            }
+            0% { opacity: 0; transform: scale(0.1); filter: blur(20px); }
+            100% { opacity: 1; transform: scale(1); filter: blur(0); }
         }
 
         @keyframes pulse { 
@@ -129,10 +123,16 @@
             100% { opacity: 0.5; transform: translateY(5px); } 
         }
 
+        /* --- RWD 手機版優化 (關鍵修復) --- */
         @media (max-width: 1024px) { 
-            .product-container { grid-template-columns: 1fr; text-align: center; } 
-            .product-info p { border: none; padding: 0; } 
-            .brand-title { font-size: 20vw; } 
+            nav { padding: 20px; }
+            .product-container { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+            .product-info h2 { font-size: 2.5rem; margin-top: 20px; } /* 手機版標題縮小 */
+            .product-info p { border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 30px auto; }
+            .visual-frame { width: 100%; height: auto; }
+            
+            /* 手勢提示微調 */
+            .gesture-hint { bottom: 80px; } 
         }
     </style>
 </head>
@@ -145,7 +145,8 @@
             <img src="logo.png" alt="YOYI Logo" class="logo-img">
             <span class="logo-text">YOYI</span>
         </a>
-        <a href="login.html" class="login-btn">LOGIN</a>
+        <!-- 【修復】這裡改成指向老闆登入頁 auth.html -->
+        <a href="auth.html" class="login-btn">LOGIN</a>
     </nav>
 
     <div id="viewport">
@@ -162,7 +163,8 @@
         <!-- 第二屏：產品 (Loop) -->
         <section class="product-section">
             <div class="product-container">
-                <a href="product.html" class="visual-link">
+                <!-- 【修復】圖片連結指向 SA.html -->
+                <a href="SA.html" class="visual-link">
                     <div class="visual-frame">
                         <img src="product1_cover.jpg" alt="Loop Protocol" onerror="this.src='https://via.placeholder.com/1280x720/111/333?text=LOOP+PROTOCOL';">
                     </div>
@@ -174,7 +176,8 @@
                         這不是單純的問答，這是思維的延伸。<br>
                         讓 AI 接管繁瑣，你只負責決策。
                     </p>
-                    <a href="product.html" class="cta-btn">探索產品 -></a>
+                    <!-- 【修復】按鈕連結指向 SA.html -->
+                    <a href="SA.html" class="cta-btn">探索產品 -></a>
                 </div>
             </div>
             <div class="footer-stamp">© 2025 YOYI Inc. Designed in the Future.</div>
@@ -183,7 +186,7 @@
     </div>
 
     <script>
-        // 手勢引擎
+        // 手勢引擎 (保持原樣，因為邏輯沒問題)
         const viewport = document.getElementById('viewport');
         const cursor = document.getElementById('cursor');
         let currentSection = 0;
@@ -214,9 +217,9 @@
             const diffX = startX - x;
 
             // 只要稍微用力一甩 (50px) 就觸發
-            if (diffY > 50 || diffX > 50) { 
+            if (diffY > 50) { 
                 nextSection();
-            } else if (diffY < -50 || diffX < -50) {
+            } else if (diffY < -50) {
                 prevSection();
             }
         };
