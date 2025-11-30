@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YOYI ID | 登入</title>
+    
+    <!-- 字體與圖標 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- 【核心升級】引入 Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* ========== 全域與視覺設定 (保持不變) ========== */
+        * { box-sizing: border-box; outline: none; }
+        body {
+            margin: 0; padding: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; position: relative;
+        }
+        .ambient-glow {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(71, 118, 230, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 0; animation: pulse 5s ease-in-out infinite;
+        }
+        .auth-card {
+            width: 100%; max-width: 420px; padding: 40px;
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px; z-index: 1;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin: 20px; transition: all 0.3s ease;
+        }
+        .brand-logo {
+            font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 700;
+            text-align: center; margin-bottom: 10px; letter-spacing: 3px; color: #fff;
+        }
+        .card-title {
+            text-align: center; font-size: 14px; color: rgba(255, 255, 255, 0.5); margin-bottom: 30px;
+        }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-field {
+            width: 100%; padding: 15px 15px 15px 45px;
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; color: #fff; font-size: 15px; transition: 0.3s;
+        }
+        .input-field:focus {
+            border-color: #4776E6; box-shadow: 0 0 15px rgba(71, 118, 230, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .input-icon {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.3); font-size: 18px;
+        }
+        .btn-primary {
+            width: 100%; padding: 15px; background: #fff; color: #000;
+            font-weight: 700; font-size: 16px; border: none; border-radius: 12px;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
+        .btn-primary:disabled { background: #555; cursor: not-allowed; } /* 讀取中樣式 */
+        
+        .divider {
+            display: flex; align-items: center; margin: 25px 0;
+            color: rgba(255, 255, 255, 0.3); font-size: 12px;
+        }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.1); }
+        .divider span { padding: 0 10px; }
+        
+        .social-btn {
+            width: 100%; padding: 12px; margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05);
+            color: #fff; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-size: 14px; transition: 0.2s;
+        }
+        .social-btn:hover { background: rgba(255, 255, 255, 0.1); }
+        
+        .switch-mode { text-align: center; margin-top: 25px; font-size: 13px; color: rgba(255, 255, 255, 0.5); }
+        .switch-mode a {
+            color: #fff; text-decoration: none; font-weight: 600; margin-left: 5px;
+            border-bottom: 1px solid transparent; transition: 0.3s; cursor: pointer;
+        }
+        .switch-mode a:hover { border-bottom-color: #fff; }
+        
+        /* 錯誤訊息提示 */
+        #errorMsg { color: #ff4b4b; text-align: center; margin-bottom: 15px; font-size: 13px; display: none; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div class="auth-card">
+        <div class="brand-logo">YOYI ID</div>
+        <div class="card-title" id="cardTitle">登入以管理您的分身</div>
+
+        <!-- 錯誤訊息容器 -->
+        <div id="errorMsg"></div>
+
+        <form id="authForm" onsubmit="handleAuth(event)">
+            <div class="input-group">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" class="input-field" placeholder="Email 信箱" required id="email">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" class="input-field" placeholder="Password 密碼" required id="password">
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">登入</button>
+        </form>
+
+        <div class="divider"><span>OR CONTINUE WITH</span></div>
+
+        <button class="social-btn" onclick="socialLogin('google')">
+            <i class="fab fa-google" style="color: #DB4437;"></i> Google 帳號登入
+        </button>
+        <button class="social-btn" onclick="socialLogin('line')">
+            <i class="fab fa-line" style="color: #00C300;"></i> LINE 帳號登入
+        </button>
+        <button class="social-btn" onclick="socialLogin('apple')">
+            <i class="fab fa-apple"></i> Apple ID 登入
+        </button>
+
+        <div class="switch-mode">
+            <span id="switchText">還沒有帳號？</span>
+            <a onclick="toggleMode()" id="switchBtn">申請 3 天免費試用</a>
+        </div>
+    </div>
+
+    <script>
+        // ========== YOYI 核心連線設定 ==========
+        
+        // 1. 初始化 Supabase 客戶端
+        const supabaseUrl = 'https://skkjzquxollefddyhtxt.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNra2p6cXV4b2xsZWZkZHlodHh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTQ4NzMsImV4cCI6MjA4MDA3MDg3M30.S0tcaKijsb-rrJuZWeBn9uUr8geu63qKNa-cdgjS12I';
+        
+        // 【修正點】：變數名稱改為 supabaseClient，避免跟工具箱名稱衝突
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        console.log("YOYI Auth System Loaded"); // 檢查點：打開 F12 應該要看到這行
+
+        // ========== 邏輯控制 ==========
+        let isLoginMode = true;
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // 切換 登入/註冊 模式
+        function toggleMode() {
+            isLoginMode = !isLoginMode;
+            errorMsg.style.display = 'none'; // 清除錯誤訊息
+            
+            if (isLoginMode) {
+                document.getElementById('cardTitle').innerText = "登入以管理您的分身";
+                submitBtn.innerText = "登入";
+                document.getElementById('switchText').innerText = "還沒有帳號？";
+                document.getElementById('switchBtn').innerText = "申請 3 天免費試用";
+            } else {
+                document.getElementById('cardTitle').innerText = "建立您的智能分身 (3天免費)";
+                submitBtn.innerText = "立即啟用";
+                document.getElementById('switchText').innerText = "已經有帳號？";
+                document.getElementById('switchBtn').innerText = "直接登入";
+            }
+        }
+
+        // 處理表單送出
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // UI 進入讀取狀態
+            submitBtn.disabled = true;
+            submitBtn.innerText = "處理中...";
+            errorMsg.style.display = 'none';
+
+            try {
+                if (isLoginMode) {
+                    // --- 登入邏輯 ---
+                    // 使用 supabaseClient 來呼叫
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    if (error) throw error;
+                    
+                    alert("登入成功！準備跳轉至後台...");
+                    window.location.href = 'boss_editor.html';
+
+                } else {
+                    // --- 註冊邏輯 (申請試用) ---
+                    // 使用 supabaseClient 來呼叫
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password
+                    });
+                    if (error) throw error;
+
+                    alert("註冊成功！請檢查您的信箱並點擊驗證連結，即可啟用帳號。");
+                    toggleMode(); // 註冊完切回登入
+                }
+            } catch (err) {
+                // 顯示錯誤訊息
+                console.error(err);
+                errorMsg.innerText = "錯誤: " + err.message;
+                errorMsg.style.display = 'block';
+            } finally {
+                // UI 恢復正常
+                submitBtn.disabled = false;
+                submitBtn.innerText = isLoginMode ? "登入" : "立即啟用";
+            }
+        }
+
+        // 第三方登入
+        async function socialLogin(provider) {
+            alert(`正在設定 ${provider} 登入功能... (需在 Supabase 後台開啟 Auth Provider)`);
+        }
+    </script>
+</body>
+</html>

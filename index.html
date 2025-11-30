@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>祐逸 YOYI | Gesture OS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 引入 Noto Sans TC 與 Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* --- 0. 基礎設定 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
+        html, body {
+            margin: 0; height: 100%; overflow: hidden; /* 隱藏捲軸，全手勢操作 */
+            background-color: #000; color: #fff;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        /* --- 1. 導航 (固定在最上層) --- */
+        nav {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 25px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; pointer-events: none;
+        }
+        .logo-group { pointer-events: auto; display: flex; align-items: center; gap: 15px; text-decoration: none; }
+        .logo-img { height: 32px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+        .logo-text { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 2px; color: #fff; }
+        
+        .login-btn {
+            pointer-events: auto; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-size: 14px; color: #fff; text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.3); padding: 8px 24px; border-radius: 50px; background: rgba(0,0,0,0.5); transition: 0.3s;
+        }
+        .login-btn:hover { background: #fff; color: #000; }
+
+        /* --- 2. 視口容器 (負責滑動) --- */
+        #viewport {
+            width: 100%; height: 100%;
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1); /* 絲滑切換 */
+        }
+
+        section {
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            position: relative; overflow: hidden;
+        }
+
+        /* --- 3. 第一屏：品牌主視覺 (王者降臨動畫) --- */
+        .brand-section {
+            background: radial-gradient(circle at center, #151515 0%, #000 80%);
+        }
+
+        /* ★★★ 這裡就是你要的：由小變大，衝擊力滿點 ★★★ */
+        .brand-title {
+            font-family: 'Orbitron', sans-serif; 
+            font-size: clamp(6rem, 25vw, 18rem); /* 巨大 */
+            font-weight: 900; line-height: 0.8; margin: 0;
+            background: linear-gradient(180deg, #fff 10%, #444 100%); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            
+            /* 動畫設定：BigBang */
+            opacity: 0; 
+            animation: bigBang 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        }
+
+        .gesture-hint {
+            position: absolute; bottom: 50px; color: #555; font-size: 14px; letter-spacing: 2px;
+            animation: pulse 2s infinite 1s; /* 延遲 1秒出現，不搶主角戲 */
+            text-transform: uppercase; opacity: 0; animation-fill-mode: forwards;
+        }
+        .gesture-icon { font-size: 24px; margin-bottom: 10px; display: block; }
+
+        /* --- 4. 第二屏：產品 (Loop) --- */
+        .product-section { background: #050505; }
+        .product-container {
+            width: 90%; max-width: 1400px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 60px; align-items: center;
+        }
+        
+        .visual-link { display: block; text-decoration: none; position: relative; width: 100%; }
+        .visual-frame {
+            width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 0 100px rgba(0,0,0,0.8); transition: 0.4s; position: relative;
+        }
+        .visual-frame img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: 0.4s; }
+        .visual-link:hover .visual-frame { transform: scale(1.02); border-color: #fff; }
+        .visual-link:hover img { opacity: 1; }
+        
+        .product-info h2 { font-family: 'Orbitron', sans-serif; font-size: 4rem; margin-bottom: 20px; text-transform: uppercase; line-height: 1; }
+        .product-info p { color: #aaa; font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px; border-left: 2px solid #fff; padding-left: 20px; }
+        
+        .cta-btn {
+            display: inline-block; background: #fff; color: #000; padding: 18px 50px; font-weight: 900; border-radius: 4px;
+            text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+        }
+        .cta-btn:hover { background: #ccc; }
+
+        /* --- 5. 手勢提示光圈 --- */
+        .cursor-follower {
+            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+            pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        body.active .cursor-follower { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-color: #fff; }
+
+        .footer-stamp { position: absolute; bottom: 30px; width: 100%; text-align: center; color: #333; font-size: 12px; font-family: 'Orbitron', monospace; }
+
+        /* --- 動畫定義 (關鍵) --- */
+        @keyframes bigBang {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.1); /* 從極小開始 */
+                filter: blur(20px);    /* 一開始是模糊的 */
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1);   /* 瞬間變大 */
+                filter: blur(0);       /* 變得清晰銳利 */
+            }
+        }
+
+        @keyframes pulse { 
+            0% { opacity: 0; transform: translateY(10px); } 
+            50% { opacity: 1; transform: translateY(0); } 
+            100% { opacity: 0.5; transform: translateY(5px); } 
+        }
+
+        @media (max-width: 1024px) { 
+            .product-container { grid-template-columns: 1fr; text-align: center; } 
+            .product-info p { border: none; padding: 0; } 
+            .brand-title { font-size: 20vw; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor-follower" id="cursor"></div>
+
+    <nav>
+        <a href="#" class="logo-group">
+            <img src="logo.png" alt="YOYI Logo" class="logo-img">
+            <span class="logo-text">YOYI</span>
+        </a>
+        <a href="login.html" class="login-btn">LOGIN</a>
+    </nav>
+
+    <div id="viewport">
+        
+        <!-- 第一屏：大爆炸開場 -->
+        <section class="brand-section">
+            <h1 class="brand-title">YOYI</h1>
+            <div class="gesture-hint">
+                <i class="fas fa-hand-pointer gesture-icon"></i>
+                Drag / Swipe to Future
+            </div>
+        </section>
+
+        <!-- 第二屏：產品 (Loop) -->
+        <section class="product-section">
+            <div class="product-container">
+                <a href="product.html" class="visual-link">
+                    <div class="visual-frame">
+                        <img src="product1_cover.jpg" alt="Loop Protocol" onerror="this.src='https://via.placeholder.com/1280x720/111/333?text=LOOP+PROTOCOL';">
+                    </div>
+                </a>
+                <div class="product-info">
+                    <h2>Loop<br>Protocol</h2>
+                    <p>
+                        重塑溝通。<br>
+                        這不是單純的問答，這是思維的延伸。<br>
+                        讓 AI 接管繁瑣，你只負責決策。
+                    </p>
+                    <a href="product.html" class="cta-btn">探索產品 -></a>
+                </div>
+            </div>
+            <div class="footer-stamp">© 2025 YOYI Inc. Designed in the Future.</div>
+        </section>
+
+    </div>
+
+    <script>
+        // 手勢引擎
+        const viewport = document.getElementById('viewport');
+        const cursor = document.getElementById('cursor');
+        let currentSection = 0;
+        const totalSections = document.querySelectorAll('section').length;
+        
+        let startY = 0;
+        let startX = 0;
+        let isDragging = false;
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const onStart = (x, y) => {
+            isDragging = true;
+            startX = x;
+            startY = y;
+            document.body.classList.add('active');
+        };
+
+        const onEnd = (x, y) => {
+            if (!isDragging) return;
+            isDragging = false;
+            document.body.classList.remove('active');
+
+            const diffY = startY - y;
+            const diffX = startX - x;
+
+            // 只要稍微用力一甩 (50px) 就觸發
+            if (diffY > 50 || diffX > 50) { 
+                nextSection();
+            } else if (diffY < -50 || diffX < -50) {
+                prevSection();
+            }
+        };
+
+        function nextSection() {
+            if (currentSection < totalSections - 1) {
+                currentSection++;
+                updateView();
+            }
+        }
+
+        function prevSection() {
+            if (currentSection > 0) {
+                currentSection--;
+                updateView();
+            }
+        }
+
+        function updateView() {
+            viewport.style.transform = `translateY(-${currentSection * 100}vh)`;
+        }
+
+        document.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
+        document.addEventListener('mouseup', e => onEnd(e.clientX, e.clientY));
+        document.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY));
+        document.addEventListener('touchend', e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
+
+        // 滾輪支援
+        let isScrolling = false;
+        document.addEventListener('wheel', (e) => {
+            if (isScrolling) return;
+            isScrolling = true;
+            if (e.deltaY > 0) nextSection();
+            else prevSection();
+            setTimeout(() => isScrolling = false, 800);
+        });
+    </script>
+</body>
+</html>
