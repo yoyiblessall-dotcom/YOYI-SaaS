@@ -225,29 +225,50 @@ function updateOrbit(faqs) {
   }
 }
 
-// 核心：點擊處理與數據回報
+// ========================================================
+// 新增：寫入 Log 的功能
+// ========================================================
+async function logToCloud(msg, response, type) {
+    if (!CLIENT_ID) return;
+    // 這裡我們不等待結果 (Fire and Forget)，以免卡住介面
+    supabaseClient.from('chat_logs').insert([
+        { user_id: CLIENT_ID, message: msg, bot_response: response, type: type }
+    ]).then(({ error }) => {
+        if(error) console.error("Log Error:", error);
+    });
+}
+
+// 修改後的按鈕點擊處理
 function handleInput(q, a, id) {
   addNode("user", q);
   showProcessing();
   
-  // 偷偷回報數據 (不等待結果)
+  // 1. 計數 (既有功能)
   if (id && CLIENT_ID) {
       supabaseClient.rpc('increment_click_count', { row_id: id });
   }
+  // 2. 寫入 Log (新功能)
+  logToCloud(q, a, 'button');
 
   setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
 }
 
+// 修改後的文字發送處理
 function handleSend() {
   const input = document.getElementById("userInput"); const text = input.value.trim();
   if(!text) return;
   addNode("user", text); input.value = ""; showProcessing();
+  
   let ans = "如需詳細服務，請點擊上方按鈕聯絡專人。";
   if (currentQnA.length > 0) {
     for(let f of currentQnA) {
         if(text.includes(f.question)) { ans = f.answer; break; }
     }
   }
+  
+  // 寫入 Log (新功能)
+  logToCloud(text, ans, 'text');
+
   setTimeout(() => { removeProcessing(); addNode("bot", ans); }, 1000);
 }
 
