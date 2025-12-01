@@ -207,20 +207,83 @@
 
         /* --- RWD 手機版 --- */
         @media (max-width: 1024px) { 
-            nav { padding: 20px; }
+            nav { padding: 15px 20px; }
+            
+            /* 修正版面邏輯：使用 flex 均分空間，防止內容溢出 */
+            .product-section {
+                justify-content: space-evenly; /* 垂直均分 */
+                padding: 60px 20px 20px; /* 避開頂部 Nav */
+            }
+
             .product-container { 
+                width: 100%;
+                height: 100%;
                 grid-template-columns: 1fr; /* 單欄 */
-                text-align: center; 
-                gap: 40px; 
+                grid-template-rows: auto auto; /* 自動高度 */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2vh; /* 使用相對單位，間距隨螢幕變小 */
             }
+
+            /* 手機模型：改為相對高度，永遠佔據螢幕的 40% */
             .phone-mockup-wrapper {
-                width: 260px; height: 520px; /* 手機上縮小 */
-                order: -1; /* 讓手機排在文字上面 */
+                width: auto;
+                height: 40vh; /* 關鍵修正：原本 520px 太高了，導致爆版 */
+                aspect-ratio: 9/19; /* 鎖定手機比例 */
+                order: -1; 
+                margin-top: 10px;
+                animation: floatPhone 4s ease-in-out infinite; /* 手機版浮動慢一點 */
             }
-            .product-info { text-align: center; display: flex; flex-direction: column; align-items: center; }
-            .hero-title { font-size: 2.5rem; line-height: 1.3; } /* 手機標題縮小 */
-            .hero-desc { border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 30px auto; }
-            .gesture-hint { bottom: 80px; } 
+
+            /* 文字資訊：緊湊排列 */
+            .product-info { 
+                text-align: center; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                width: 100%;
+            }
+
+            .hero-title { 
+                font-size: 2rem; /* 字體縮小 */
+                line-height: 1.2; 
+                margin-bottom: 15px;
+            } 
+
+            .hero-desc { 
+                border: none; 
+                padding: 0; 
+                font-size: 0.95rem; /* 說明文縮小 */
+                width: 100%; 
+                max-width: 320px;
+                margin: 0 auto 20px auto; 
+                color: rgba(255,255,255,0.8);
+            }
+            
+            /* 按鈕優化 */
+            .cta-btn {
+                padding: 12px 30px;
+                font-size: 14px;
+            }
+
+            /* 底部版權字縮小 */
+            .footer-stamp { 
+                bottom: 15px; 
+                font-size: 10px; 
+                opacity: 0.5;
+            }
+
+            /* 手勢提示位置微調 */
+            .gesture-hint { bottom: 100px; } 
+        }
+
+        /* 針對超小螢幕 (iPhone SE 等) 的額外保護 */
+        @media (max-height: 700px) and (max-width: 1024px) {
+            .phone-mockup-wrapper { height: 35vh; }
+            .hero-title { font-size: 1.8rem; margin-bottom: 10px; }
+            .hero-desc { font-size: 0.85rem; margin-bottom: 15px; -webkit-line-clamp: 3; }
         }
     </style>
 </head>
