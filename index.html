@@ -13,13 +13,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* --- 0. 基礎設定 --- */
+        /* --- 0. 基礎設定 (Gesture OS 核心) --- */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         html, body {
-            margin: 0; height: 100%; overflow: hidden;
+            margin: 0; height: 100%; 
+            /* 電腦版：隱藏捲軸，強制手勢操作 */
+            overflow: hidden; 
             background-color: #000; color: #fff;
-            /* 預設字體改為 Noto Sans TC 以支援優美中文 */
             font-family: 'Noto Sans TC', sans-serif;
         }
 
@@ -31,9 +32,8 @@
         }
         .logo-group { pointer-events: auto; display: flex; align-items: center; gap: 15px; text-decoration: none; }
         .logo-img { height: 32px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
-        
-        .notranslate { translate: no; }
         .logo-text { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 2px; color: #fff; }
+        .notranslate { translate: no; }
         
         .login-btn {
             pointer-events: auto; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; font-size: 14px; color: #fff; text-decoration: none;
@@ -42,7 +42,7 @@
         }
         .login-btn:hover { background: #fff; color: #000; }
 
-        /* --- 2. 視口容器 --- */
+        /* --- 2. 視口容器 (無限延伸的核心) --- */
         #viewport {
             width: 100%; height: 100%;
             transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
@@ -76,172 +76,125 @@
             display: flex; flex-direction: column; align-items: center; gap: 10px;
             font-family: 'Orbitron', sans-serif;
         }
-        .gesture-icon { font-size: 24px; }
 
-        /* --- 4. 第二屏：產品 (手機懸浮展示) --- */
+        /* --- 4. 第二屏：產品展示 (融合了你的備份結構與手機模型) --- */
         .product-section { background: #050505; }
         
         .product-container {
             width: 85%; max-width: 1200px; 
-            display: grid; grid-template-columns: 1fr 1fr; /* 左右佈局 */
+            display: grid; grid-template-columns: 1fr 1fr; /* 電腦版維持左右佈局 */
             gap: 80px; align-items: center; justify-items: center;
         }
 
-        /* 手機外框容器 */
+        /* 手機外框容器 (電腦版設定) */
         .phone-mockup-wrapper {
             position: relative;
-            width: 320px; /* 手機標準寬度 */
-            height: 650px;
+            width: 320px; height: 650px;
             perspective: 1000px;
             text-decoration: none;
-            animation: floatPhone 6s ease-in-out infinite; /* 懸浮特效 */
+            animation: floatPhone 6s ease-in-out infinite;
         }
 
         .phone-bezel {
             width: 100%; height: 100%;
-            background: #000;
-            border-radius: 45px;
-            border: 8px solid #1a1a1a;
-            box-shadow: 
-                0 0 0 2px #333,
-                0 30px 60px rgba(0,0,0,0.8),
-                0 0 80px rgba(0, 242, 96, 0.1); /* 綠色微光 */
-            overflow: hidden;
-            position: relative;
-            transition: transform 0.3s ease, border-color 0.3s;
+            background: #000; border-radius: 45px; border: 8px solid #1a1a1a;
+            box-shadow: 0 0 0 2px #333, 0 30px 60px rgba(0,0,0,0.8), 0 0 80px rgba(0, 242, 96, 0.1);
+            overflow: hidden; position: relative; transition: transform 0.3s ease, border-color 0.3s;
         }
-
-        .phone-bezel img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0.9;
-            transition: opacity 0.3s;
-        }
-
-        .phone-mockup-wrapper:hover .phone-bezel {
-            transform: scale(1.02) rotateY(-5deg);
-            border-color: #444;
-        }
+        .phone-bezel img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.3s; }
+        .phone-mockup-wrapper:hover .phone-bezel { transform: scale(1.02) rotateY(-5deg); border-color: #444; }
         .phone-mockup-wrapper:hover img { opacity: 1; }
-
-        .notch {
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            width: 100px; height: 25px; background: #000; border-radius: 20px; z-index: 10;
-        }
+        .notch { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 100px; height: 25px; background: #000; border-radius: 20px; z-index: 10; }
         
-        /* 文案樣式 (賈伯斯修正版) */
+        /* 文字區域 */
         .product-info { text-align: left; }
-        
         .hero-title {
-            font-family: 'Noto Sans TC', sans-serif; /* 確保中文漂亮 */
-            font-size: 3.5rem; 
-            line-height: 1.2; 
-            margin-bottom: 25px; 
-            font-weight: 900; 
-            letter-spacing: 2px;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Noto Sans TC', sans-serif; font-size: 3.5rem; line-height: 1.2; 
+            margin-bottom: 25px; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        
-        .highlight-text {
-            color: #00f260; 
-            -webkit-text-fill-color: #00f260; 
-            text-shadow: 0 0 20px rgba(0, 242, 96, 0.5);
-        }
-
+        .highlight-text { color: #00f260; -webkit-text-fill-color: #00f260; text-shadow: 0 0 20px rgba(0, 242, 96, 0.5); }
         .hero-desc { 
-            color: rgba(255,255,255,0.7); 
-            font-size: 1.1rem; 
-            line-height: 1.8; 
-            margin-bottom: 40px; 
-            border-left: 2px solid #fff; 
-            padding-left: 20px; 
-            max-width: 500px;
-            font-weight: 400;
+            color: rgba(255,255,255,0.7); font-size: 1.1rem; line-height: 1.8; margin-bottom: 40px; 
+            border-left: 2px solid #fff; padding-left: 20px; max-width: 500px; font-weight: 400;
         }
-        
         .cta-btn {
-            display: inline-block; 
-            background: #fff; 
-            color: #000; 
-            padding: 15px 40px; 
-            font-weight: 700; 
-            border-radius: 4px;
-            text-decoration: none; 
-            letter-spacing: 1px; 
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            display: inline-block; background: #fff; color: #000; padding: 15px 40px; font-weight: 700; border-radius: 4px;
+            text-decoration: none; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        .cta-btn:hover { 
-            background: #f0f0f0; 
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255,255,255,0.4);
-        }
+        .cta-btn:hover { background: #f0f0f0; transform: scale(1.05); }
 
         .footer-stamp { position: absolute; bottom: 30px; width: 100%; text-align: center; color: #333; font-size: 12px; font-family: 'Orbitron', monospace; }
-
-        /* --- 5. 手勢光圈 --- */
-        .cursor-follower {
-            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
-            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-            pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
+        .cursor-follower { position: fixed; top: 0; left: 0; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s; }
         body.active .cursor-follower { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-color: #fff; }
 
-        /* --- 動畫 --- */
-        @keyframes bigBang {
-            0% { opacity: 0; transform: scale(0.1); filter: blur(20px); }
-            100% { opacity: 1; transform: scale(1); filter: blur(0); }
-        }
-        @keyframes pulse { 
-            0% { opacity: 0; transform: translateY(10px); } 
-            50% { opacity: 1; transform: translateY(0); } 
-            100% { opacity: 0.5; transform: translateY(5px); } 
-        }
-        @keyframes floatPhone {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+        @keyframes bigBang { 0% { opacity: 0; transform: scale(0.1); filter: blur(20px); } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
+        @keyframes pulse { 0% { opacity: 0; transform: translateY(10px); } 50% { opacity: 1; transform: translateY(0); } 100% { opacity: 0.5; transform: translateY(5px); } }
+        @keyframes floatPhone { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-/* --- 賈伯斯最終修正：手機版解除封印 (Infinity Scroll) --- */
+
+        /* =========================================
+           RWD 核心 (賈伯斯混合動力模式)
+           ========================================= */
         @media (max-width: 1024px) { 
-            /* 1. 解除全域鎖定，允許頁面滾動 */
+            /* 1. 解鎖滾動：手機版允許滑動，不再鎖死一頁 */
             html, body {
-                overflow-y: auto !important; /* 強制開啟垂直滾動 */
+                overflow-y: auto !important; 
                 height: auto !important;
                 position: static !important;
             }
 
-            /* 2. 廢除 JS 的強制位移，讓內容自然排列 */
+            /* 2. 禁用手勢引擎的 JS 位移，改用自然排列 */
             #viewport {
-                transform: none !important; /* 禁止 JS 移動這個容器 */
+                transform: none !important; 
                 height: auto !important;
                 overflow: visible !important;
             }
 
-            /* 3. 讓每一頁的高度「至少」是螢幕高，但內容多了可以長高 */
+            /* 3. 讓每個區塊至少一屏高，但內容多了可以自動長高 */
             section {
-                height: auto !important; /* 不再鎖死高度 */
-                min-height: 100vh; /* 至少跟螢幕一樣高 */
-                display: flex;
-                flex-direction: column;
-                justify-content: center; /* 內容垂直置中 */
-                padding: 80px 0; /* 上下留白，避免黏邊 */
+                height: auto !important; 
+                min-height: 100vh; 
+                padding: 80px 20px 40px 20px; /* 避開 Nav */
             }
 
-            /* 4. 針對你的產品容器，確保它不會切到字 */
-            .product-container {
-                height: auto !important; 
-                padding-bottom: 50px; /* 確保底部有呼吸空間 */
+            /* 4. 手機版佈局 (剛剛調整好的霸氣版) */
+            .product-container { 
+                grid-template-columns: 1fr; /* 單欄 */
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                gap: 20px;
+                padding-bottom: 40px;
+            }
+
+            /* 5. 手機模型：寬度 75vw，氣勢足，但限制高度避免蓋住文字 */
+            .phone-mockup-wrapper {
+                width: 75vw;
+                height: auto;
+                aspect-ratio: 9/19;
+                max-height: 55vh; /* 關鍵：留空間給下面的字 */
+                flex-shrink: 1;
+                order: -1; 
+                margin-top: 10px;
+                animation: none; /* 手機版不浮動，避免干擾閱讀 */
+            }
+
+            /* 6. 文字區塊：保證不被切掉 */
+            .product-info { 
+                width: 100%; text-align: center; 
+                display: flex; flex-direction: column; align-items: center; 
+                flex-shrink: 0;
             }
             
-            /* 5. 隱藏手機版不需要的手勢提示 (因為現在是用滑的) */
-            .gesture-hint { display: none !important; }
-            
-            /* 6. 隱藏滑鼠游標特效 (手機不需要) */
-            .cursor-follower { display: none !important; }
+            .hero-title { font-size: 2.2rem; margin-bottom: 15px; } 
+            .hero-desc { 
+                border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 25px auto; 
+                color: rgba(255,255,255,0.8);
+            }
+            .cta-btn { width: 100%; max-width: 280px; padding: 14px 0; }
+
+            /* 7. 隱藏不必要的電腦版元素 */
+            .gesture-hint, .cursor-follower, .footer-stamp { display: none !important; }
         }
     </style>
 </head>
@@ -257,9 +210,10 @@
         <a href="auth.html" class="login-btn notranslate">LOGIN</a>
     </nav>
 
+    <!-- 視口容器：未來你可以加 section3, section4... -->
     <div id="viewport">
         
-        <!-- 第一屏 -->
+        <!-- 第一屏：品牌主視覺 -->
         <section class="brand-section">
             <h1 class="brand-title notranslate">YOYI</h1>
             <div class="gesture-hint">
@@ -268,20 +222,20 @@
             </div>
         </section>
 
-        <!-- 第二屏：懸浮手機 + 新文案 -->
+        <!-- 第二屏：數位分身 (產品 1) -->
         <section class="product-section">
             <div class="product-container">
                 
-                <!-- 左側：懸浮手機 (連結到 SA.html) -->
+                <!-- 手機模型 (連結到 SA.html) -->
                 <a href="SA.html" class="phone-mockup-wrapper">
                     <div class="phone-bezel">
                         <div class="notch"></div>
-                        <!-- 確保圖片連結正確 -->
-                        <img src="mobile_cover.png" alt="YOYI OS Interface" onerror="this.src='https://via.placeholder.com/320x650/000/0f0?text=UPLOAD+MOBILE+PNG';">
+                        <!-- 請確保 mobile_cover.png 存在，或改為你的截圖 -->
+                        <img src="mobile_cover.png" alt="YOYI OS Interface" onerror="this.src='https://via.placeholder.com/320x650/000/0f0?text=OPEN+YOYI+OS';">
                     </div>
                 </a>
 
-                <!-- 右側：文字介紹 (賈伯斯版：數位分身) -->
+                <!-- 產品介紹 -->
                 <div class="product-info">
                     <h2 class="hero-title">
                         你的<br>
@@ -289,9 +243,8 @@
                     </h2>
                     
                     <p class="hero-desc">
-                        在這個過度連結的世界，你需要一個專屬的空間。<br><br>
-                        它不只是問答工具，它是你的語氣、你的故事、你的品味。
-                        讓這個分身替你與世界對話，傳遞你的心意。<br><br>
+                        在這個過度連結的世界，你需要一個專屬的空間。<br>
+                        它不只是問答工具，它是你的語氣、你的故事、你的品味。<br>
                         即使你離線了，你的溫暖依然存在。
                     </p>
                     
@@ -301,10 +254,12 @@
             <div class="footer-stamp">© 2025 YOYI Inc. Designed in the Future.</div>
         </section>
 
+        <!-- 未來如果你要加新產品，直接複製上面的 section 貼在這裡即可 -->
+
     </div>
 
     <script>
-        // 手勢引擎 (保持不變)
+        // --- 手勢引擎 (僅在電腦版生效，手機版會被 CSS 禁用) ---
         const viewport = document.getElementById('viewport');
         const cursor = document.getElementById('cursor');
         let currentSection = 0;
@@ -314,12 +269,16 @@
         let startX = 0;
         let isDragging = false;
 
+        // 滑鼠游標跟隨
         document.addEventListener('mousemove', (e) => {
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
         });
 
         const onStart = (x, y) => {
+            // 如果是手機版 (寬度小於 1024)，完全不執行手勢邏輯
+            if (window.innerWidth <= 1024) return;
+            
             isDragging = true;
             startX = x;
             startY = y;
@@ -332,13 +291,8 @@
             document.body.classList.remove('active');
 
             const diffY = startY - y;
-            const diffX = startX - x;
-
-            if (diffY > 50) { 
-                nextSection();
-            } else if (diffY < -50) {
-                prevSection();
-            }
+            if (diffY > 50) nextSection();
+            else if (diffY < -50) prevSection();
         };
 
         function nextSection() {
@@ -361,11 +315,11 @@
 
         document.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
         document.addEventListener('mouseup', e => onEnd(e.clientX, e.clientY));
-        document.addEventListener('touchstart', e => onStart(e.touches[0].clientX, e.touches[0].clientY));
-        document.addEventListener('touchend', e => onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY));
-
+        
+        // 滾輪切換 (同樣只在電腦版生效)
         let isScrolling = false;
         document.addEventListener('wheel', (e) => {
+            if (window.innerWidth <= 1024) return; // 手機版用原生滾動
             if (isScrolling) return;
             isScrolling = true;
             if (e.deltaY > 0) nextSection();
