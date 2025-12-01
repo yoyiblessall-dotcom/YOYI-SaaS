@@ -205,23 +205,44 @@
             50% { transform: translateY(-15px); }
         }
 
-        /* --- RWD 手機版 --- */
-    @media (max-width: 1024px) { 
-        nav { padding: 20px; }
-        .product-container { 
-            grid-template-columns: 1fr; /* 單欄 */
-            text-align: center; 
-            gap: 40px; 
+/* --- 賈伯斯最終修正：手機版解除封印 (Infinity Scroll) --- */
+        @media (max-width: 1024px) { 
+            /* 1. 解除全域鎖定，允許頁面滾動 */
+            html, body {
+                overflow-y: auto !important; /* 強制開啟垂直滾動 */
+                height: auto !important;
+                position: static !important;
+            }
+
+            /* 2. 廢除 JS 的強制位移，讓內容自然排列 */
+            #viewport {
+                transform: none !important; /* 禁止 JS 移動這個容器 */
+                height: auto !important;
+                overflow: visible !important;
+            }
+
+            /* 3. 讓每一頁的高度「至少」是螢幕高，但內容多了可以長高 */
+            section {
+                height: auto !important; /* 不再鎖死高度 */
+                min-height: 100vh; /* 至少跟螢幕一樣高 */
+                display: flex;
+                flex-direction: column;
+                justify-content: center; /* 內容垂直置中 */
+                padding: 80px 0; /* 上下留白，避免黏邊 */
+            }
+
+            /* 4. 針對你的產品容器，確保它不會切到字 */
+            .product-container {
+                height: auto !important; 
+                padding-bottom: 50px; /* 確保底部有呼吸空間 */
+            }
+            
+            /* 5. 隱藏手機版不需要的手勢提示 (因為現在是用滑的) */
+            .gesture-hint { display: none !important; }
+            
+            /* 6. 隱藏滑鼠游標特效 (手機不需要) */
+            .cursor-follower { display: none !important; }
         }
-        .phone-mockup-wrapper {
-            width: 260px; height: 520px; /* 手機上縮小 */
-            order: -1; /* 讓手機排在文字上面 */
-        }
-        .product-info { text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .hero-title { font-size: 2.5rem; line-height: 1.3; } /* 手機標題縮小 */
-        .hero-desc { border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 30px auto; }
-        .gesture-hint { bottom: 80px; } 
-    }
     </style>
 </head>
 <body>
