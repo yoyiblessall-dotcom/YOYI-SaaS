@@ -9,70 +9,186 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-  /* 保留您最愛的 Cyberpunk 視覺風格 */
+  /* =========================================
+     CORE AESTHETICS (視覺核心 - 勿動)
+     ========================================= */
   :root {
-    --accent: #fff; --glow: rgba(255, 255, 255, 0.5); --bg-deep: #000;
-    --glass: rgba(255, 255, 255, 0.03); --border: rgba(255, 255, 255, 0.08);
-    --aurora-1: #00f260; --aurora-2: #0575e6; --aurora-3: #00f260;
+    --accent: #00f260; /* 預設綠色，會被 JS 覆蓋 */
+    --glow: rgba(0, 242, 96, 0.4);
+    --bg-deep: #000;
+    --glass: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.15);
+    --aurora-1: #00f260; 
+    --aurora-2: #0575e6; 
+    --aurora-3: #00f260;
   }
+
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; padding: 0; font-family: 'Space Grotesk', sans-serif; background-color: var(--bg-deep); color: #fff; height: 100dvh; width: 100vw; display: flex; flex-direction: column; overflow: hidden; }
-  
-  .aether-void { position: absolute; inset: -50%; background: conic-gradient(from 0deg, transparent 0deg, var(--aurora-1) 60deg, transparent 120deg, var(--aurora-2) 180deg, transparent 240deg, var(--aurora-3) 300deg, transparent 360deg); filter: blur(90px); opacity: 0.35; animation: rotateVoid 30s linear infinite; z-index: -1; transition: all 2s ease; }
-  .noise-overlay { position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: -1; }
+
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Space Grotesk', -apple-system, "Microsoft JhengHei", sans-serif;
+    background-color: var(--bg-deep);
+    color: #fff;
+    height: 100dvh; 
+    width: 100vw;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 背景動效 */
+  .aether-void {
+    position: absolute; inset: -50%;
+    background: conic-gradient(
+      from 0deg, transparent 0deg, var(--aurora-1) 60deg, transparent 120deg, var(--aurora-2) 180deg, transparent 240deg, var(--aurora-3) 300deg, transparent 360deg
+    );
+    filter: blur(90px); opacity: 0.35;
+    animation: rotateVoid 30s linear infinite; z-index: -1; transition: all 2s ease;
+  }
+  .noise-overlay {
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: -1;
+  }
   @keyframes rotateVoid { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .hud-top { flex: 0 0 auto; padding: calc(20px + env(safe-area-inset-top)) 24px 20px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); backdrop-filter: blur(10px); z-index: 10; }
+  /* HUD 頂部導航 */
+  .hud-top {
+    flex: 0 0 auto; 
+    padding: calc(20px + env(safe-area-inset-top)) 24px 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    backdrop-filter: blur(10px); z-index: 10;
+  }
   .brand-logo { font-size: 16px; letter-spacing: 1px; font-weight: 700; color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 10px; }
   .status-light { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: pulse 2s infinite; }
   
-  .nav-actions { display: flex; gap: 8px; }
-  .nav-btn { background: var(--glass); border: 1px solid var(--border); color: rgba(255,255,255,0.9); text-decoration: none; font-size: 14px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s; }
+  .nav-actions { display: flex; gap: 12px; }
+  .nav-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: rgba(255,255,255,0.9);
+    text-decoration: none; font-size: 14px; width: 36px; height: 36px; 
+    display: flex; align-items: center; justify-content: center; 
+    border-radius: 50%; transition: 0.3s;
+  }
   .nav-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--glow); transform: scale(1.1); }
 
-  .stream-viewport { flex: 1; overflow-y: auto; padding: 30px 24px; display: flex; flex-direction: column; gap: 24px; mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%); scroll-behavior: smooth; }
+  /* 對話區塊 */
+  .stream-viewport {
+    flex: 1; overflow-y: auto; padding: 30px 24px;
+    display: flex; flex-direction: column; gap: 24px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    scroll-behavior: smooth;
+  }
   .node { display: flex; flex-direction: column; max-width: 88%; animation: driftUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .node.bot { align-self: flex-start; border-left: 2px solid var(--accent); padding-left: 18px; }
   .node.user { align-self: flex-end; align-items: flex-end; border-right: 2px solid rgba(255,255,255,0.3); padding-right: 18px; }
-  .node-text { font-size: 15px; line-height: 1.7; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .node-text { font-size: 15px; line-height: 1.6; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
   .node.bot .node-text { color: rgba(255,255,255,0.95); }
   .node.user .node-text { color: var(--accent); text-align: right; }
 
-  .monolith-dock { flex: 0 0 auto; padding: 0 0 calc(20px + env(safe-area-inset-bottom)) 0; background: linear-gradient(to top, #000 40%, transparent); display: flex; flex-direction: column; gap: 15px; z-index: 20; }
-  .orbit-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-  .orbit-bar { display: flex; gap: 10px; overflow-x: auto; padding: 5px 24px; scrollbar-width: none; flex: 1; scroll-behavior: smooth; }
-
-  /* 捲動箭頭樣式 */
-  .scroll-btn-right {
-    position: absolute; right: 0; top: 0; bottom: 0; width: 40px;
-    background: linear-gradient(to left, #000 40%, transparent);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 5; cursor: pointer; color: var(--accent);
-    animation: bounceRight 2s infinite;
-    display: none; /* 預設隱藏，由 JS 控制 */
+  /* 底部操作區 (包含按鈕列與輸入框) */
+  .monolith-dock {
+    flex: 0 0 auto; 
+    padding: 0 0 calc(20px + env(safe-area-inset-bottom)) 0;
+    background: linear-gradient(to top, #000 20%, rgba(0,0,0,0.8) 80%, transparent);
+    display: flex; flex-direction: column; gap: 15px; z-index: 20;
+    position: relative;
   }
+
+  /* 捲動按鈕區外框 */
+  .orbit-wrapper { 
+    position: relative; 
+    width: 100%; 
+    display: flex; 
+    align-items: center; 
+    height: 50px; /* 固定高度防止跑版 */
+  }
+
+  /* 橫向捲動條 */
+  .orbit-bar {
+    display: flex; gap: 10px; overflow-x: auto; padding: 0 24px;
+    scrollbar-width: none; flex: 1; scroll-behavior: smooth;
+    align-items: center; height: 100%;
+    padding-right: 60px; /* 預留右邊給箭頭的空間 */
+  }
+  .orbit-bar::-webkit-scrollbar { display: none; }
+
+  /* 按鈕本體 (還原玻璃質感) */
+  .orbit-chip {
+    flex: 0 0 auto; 
+    height: 36px;
+    padding: 0 16px;
+    background: rgba(20, 20, 20, 0.6); /* 半透明黑底 */
+    border: 1px solid rgba(255,255,255,0.2); 
+    color: rgba(255,255,255,0.8); 
+    font-size: 13px; letter-spacing: 0.5px;
+    cursor: pointer; transition: 0.3s; 
+    backdrop-filter: blur(8px); 
+    white-space: nowrap; font-family: inherit; 
+    border-radius: 4px; /* 方形圓角 */
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* 按鈕懸停/激活 */
+  .orbit-chip:hover, .orbit-chip:active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 242, 96, 0.1); /* 微微發光 */
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  /* 右側箭頭指引 (還原圖2樣式) */
+  .scroll-btn-right {
+    position: absolute; right: 0; top: 0; bottom: 0; 
+    width: 60px; /* 寬度足夠蓋住 */
+    background: linear-gradient(to left, #000 40%, transparent); /* 漸層消失 */
+    display: flex; align-items: center; justify-content: center;
+    z-index: 30; cursor: pointer; color: var(--accent);
+    animation: bounceRight 2s infinite;
+    pointer-events: auto; /* 確保可點擊 */
+    display: none; /* JS 控制顯示 */
+  }
+  .scroll-circle {
+      width: 30px; height: 30px; 
+      border-radius: 50%; 
+      background: rgba(255,255,255,0.1); 
+      border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(5px);
+  }
+
   @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
 
-  .core-input-wrapper { margin: 0 24px; height: 50px; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+  /* 輸入框區域 */
+  .core-input-wrapper {
+    margin: 0 24px; height: 50px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; gap: 15px; transition: 0.3s;
+  }
   .core-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
-  .transmit-btn { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 13px; cursor: pointer; }
+  .transmit-btn { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; font-weight: 500;}
+  .transmit-btn:hover { color: var(--accent); }
 
   @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
   @keyframes driftUp { from { opacity: 0; transform: translateY(20px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 
-  .boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Space Grotesk', monospace; transition: opacity 1s ease; }
-  .glitch-text { font-size: 26px; letter-spacing: 3px; color: #fff; animation: glitch 1s infinite; }
-  @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 2px 0 red, -2px 0 blue; } 100% { opacity: 1; } }
-
-  #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 2147483647 !important; display: none; justify-content: center; align-items: center; flex-direction: column; }
+  /* 登入閘道 */
+  #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2147483647; display: none; justify-content: center; align-items: center; flex-direction: column; }
   .login-box { width: 90%; max-width: 400px; background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-radius: 20px; padding: 40px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); }
   .login-title { color: #fff; font-size: 20px; margin-bottom: 20px; letter-spacing: 2px; }
   .login-input { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #00ff88; font-family: monospace; text-align: center; font-size: 16px; border-radius: 10px; margin-bottom: 20px; outline: none; }
   .login-btn { padding: 12px 30px; background: #00ff88; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  
+  /* 開機動畫層 */
+  .boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Space Grotesk', monospace; transition: opacity 1s ease; }
+  .glitch-text { font-size: 26px; letter-spacing: 3px; color: #fff; animation: glitch 1s infinite; }
+  @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 2px 0 red, -2px 0 blue; } 100% { opacity: 1; } }
 </style>
 </head>
 <body>
 
+<!-- 登入閘道 -->
 <div id="loginOverlay">
     <div class="login-box">
         <div class="login-title">SYSTEM LOGIN</div>
@@ -118,11 +234,13 @@
 <div class="aether-void" id="aetherBg"></div>
 <div class="noise-overlay"></div>
 
+<!-- 開機畫面 -->
 <div class="boot-screen" id="bootLayer">
   <div class="glitch-text">STANDALONE_OS</div>
   <div style="margin-top:20px; font-size:12px; color:#666; letter-spacing:1px;" id="bootStatus">核心連線中...</div>
 </div>
 
+<!-- 頂部 HUD -->
 <div class="hud-top">
   <div class="brand-logo">
     <div class="status-light" id="statusLight"></div>
@@ -131,27 +249,29 @@
   <div class="nav-actions" id="socialDeck"></div>
 </div>
 
+<!-- 對話視窗 -->
 <div class="stream-viewport" id="chatBody"></div>
 
-====這是要替換的內容 (加入箭頭 + 改中文)：====
+<!-- 底部操作區 -->
 <div class="monolith-dock">
   <div class="orbit-wrapper">
     <div class="orbit-bar" id="quickActions"></div>
-    <!-- 補回箭頭按鈕 -->
+    <!-- 箭頭指引 (右側漸層 + 按鈕) -->
     <div class="scroll-btn-right" id="scrollArrow" onclick="scrollMenu()">
-        <i class="fas fa-chevron-right"></i>
+        <div class="scroll-circle">
+            <i class="fas fa-chevron-right"></i>
+        </div>
     </div>
   </div>
   <div class="core-input-wrapper">
     <input type="text" class="core-input" id="userInput" placeholder="輸入訊息..." autocomplete="off">
-    <!-- 改為中文 -->
     <button class="transmit-btn" onclick="handleSend()">送出</button>
   </div>
 </div>
 
 <script>
 // ========================================================
-// 1. Supabase 連線設定 (請務必填寫)
+// 設定與 Supabase 連線
 // ========================================================
 const supabaseUrl = 'https://skkjzquxollefddyhtxt.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNra2p6cXV4b2xsZWZkZHlodHh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTQ4NzMsImV4cCI6MjA4MDA3MDg3M30.S0tcaKijsb-rrJuZWeBn9uUr8geu63qKNa-cdgjS12I';
@@ -161,6 +281,27 @@ const urlParams = new URLSearchParams(window.location.search);
 const CLIENT_ID = urlParams.get('id');
 let currentQnA = [];
 
+// ========================================================
+// 人格引擎：隨機語錄庫 (Warm & Humorous Fallback)
+// ========================================================
+const fallbackMessages = [
+    "這個問題很有深度... 你的直覺告訴你答案是什麼呢？ 🤔",
+    "系統正在運算... 但我覺得你心裡其實已經有答案了，對嗎？ ✨",
+    "哇，這問題讓我這個 AI 都陷入深思了。如果是你，你會怎麼做？ 🤖",
+    "嘿！別急，有時候慢下來，答案就會像極光一樣浮現 🍃",
+    "我看見你的焦慮了，深呼吸... 你比你自己想像的更強大！ 💪",
+    "這有點超出我的資料庫範圍，但我感受到你的熱情了！要不要換個角度想？ 🔥",
+    "與其找標準答案，不如創造屬於你的規則？這才是駭客精神啊！ 🎨",
+    "這問題太棒了！但我老闆可能比較知道細節，要不要點上面的 LINE 問問他？ 😂",
+    "生活總是充滿未知，這正是它有趣的地方，不是嗎？ 🚀",
+    "你覺得這個問題的背後，真正的核心是什麼？ 🔮",
+    "如果這是電影情節，主角（也就是你）接下來會做什麼決定？ 🎬",
+    "嗯... 我還在學習人類的情感，但這個問題聽起來對你很重要。 ❤️"
+];
+
+// ========================================================
+// 初始化
+// ========================================================
 async function init() {
   if (!CLIENT_ID) return;
 
@@ -204,13 +345,13 @@ function applyTheme(profile) {
   document.getElementById("statusLight").style.boxShadow = `0 0 10px ${color}`;
 }
 
-
+// 修正後的社群圖標渲染 (支援 LINE ID 判斷)
 function renderSocials(profile) {
     const deck = document.getElementById('socialDeck'); deck.innerHTML = '';
     const links = [
         { icon: 'fas fa-phone', val: profile.link_phone, type: 'tel' },
         { icon: 'fas fa-envelope', val: profile.link_mail, type: 'mailto' },
-        { icon: 'fab fa-line', val: profile.link_line, type: 'line' }, // 標記為 line 類型
+        { icon: 'fab fa-line', val: profile.link_line, type: 'line' },
         { icon: 'fab fa-instagram', val: profile.link_ig },
         { icon: 'fab fa-facebook-f', val: profile.link_fb },
         { icon: 'fas fa-at', val: profile.link_threads }
@@ -220,24 +361,15 @@ function renderSocials(profile) {
             const a = document.createElement('a'); a.className = 'nav-btn';
             let href = link.val;
             
-            // 智能連結處理
-            if (link.type === 'tel') {
-                href = `tel:${link.val}`;
-            } else if (link.type === 'mailto') {
-                href = `mailto:${link.val}`;
-            } else if (link.type === 'line') {
-                // LINE 特殊處理：如果是連結直接用，如果是 ID 則加上前綴
-                if (href.startsWith('http')) {
-                     // 保持原樣
-                } else if (href.startsWith('@')) {
-                     href = `https://line.me/R/ti/p/${href}`; // 官方帳號
-                } else {
-                     href = `https://line.me/ti/p/~${href}`; // 個人 ID
-                }
-            } else {
-                // 其他社群連結 (IG/FB/Threads)
-                if (!href.startsWith('http')) href = `https://${href}`;
+            if (link.type === 'tel') href = `tel:${link.val}`;
+            else if (link.type === 'mailto') href = `mailto:${link.val}`;
+            else if (link.type === 'line') {
+                // LINE 智能判斷
+                if (href.startsWith('http')) { /* do nothing */ }
+                else if (href.startsWith('@')) href = `https://line.me/R/ti/p/${href}`; // 官方帳號
+                else href = `https://line.me/ti/p/~${href}`; // 個人 ID
             }
+            else if (!href.startsWith('http')) href = `https://${href}`;
 
             a.href = href; a.target = '_blank';
             a.innerHTML = `<i class="${link.icon}"></i>`;
@@ -246,12 +378,11 @@ function renderSocials(profile) {
     });
 }
 
-
-
+// 修正後的按鈕列 (包含右側箭頭邏輯)
 function updateOrbit(faqs) {
   const bar = document.getElementById("quickActions"); bar.innerHTML = "";
   const arrow = document.getElementById("scrollArrow");
-  
+
   if(faqs && faqs.length > 0) {
     faqs.forEach(item => {
       const chip = document.createElement("button"); chip.className = "orbit-chip";
@@ -259,78 +390,76 @@ function updateOrbit(faqs) {
       chip.onclick = () => handleInput(item.question, item.answer, item.id);
       bar.appendChild(chip);
     });
-    // 檢查是否需要顯示箭頭 (延遲一下等待渲染)
+
+    // 檢查是否需要顯示箭頭
     setTimeout(() => {
-        if (bar.scrollWidth > bar.clientWidth) {
-            arrow.style.display = "flex";
-        } else {
-            arrow.style.display = "none";
-        }
+        if(bar.scrollWidth > bar.clientWidth) arrow.style.display = "flex";
+        else arrow.style.display = "none";
     }, 100);
   } else {
-     if(arrow) arrow.style.display = "none";
+     arrow.style.display = "none";
   }
 }
 
-// 新增：捲動功能
+// 捲動功能
 function scrollMenu() {
     const bar = document.getElementById("quickActions");
     bar.scrollBy({ left: 150, behavior: 'smooth' });
 }
-// 新增：監聽捲動以隱藏箭頭
+// 監聽捲動以隱藏箭頭
 document.getElementById("quickActions").addEventListener("scroll", function() {
    const bar = this;
    const arrow = document.getElementById("scrollArrow");
+   // 如果捲動到最右邊 (容許 10px 誤差)，隱藏箭頭
    if(bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 10) {
        arrow.style.opacity = "0"; 
+       arrow.style.pointerEvents = "none";
    } else {
        arrow.style.opacity = "1";
+       arrow.style.pointerEvents = "auto";
    }
 });
 
-
 // ========================================================
-// 新增：寫入 Log 的功能
+// 互動處理
 // ========================================================
 async function logToCloud(msg, response, type) {
     if (!CLIENT_ID) return;
-    // 這裡我們不等待結果 (Fire and Forget)，以免卡住介面
     supabaseClient.from('chat_logs').insert([
         { user_id: CLIENT_ID, message: msg, bot_response: response, type: type }
-    ]).then(({ error }) => {
-        if(error) console.error("Log Error:", error);
-    });
+    ]).then(({ error }) => { if(error) console.error("Log Error:", error); });
 }
 
-// 修改後的按鈕點擊處理
 function handleInput(q, a, id) {
   addNode("user", q);
   showProcessing();
   
-  // 1. 計數 (既有功能)
-  if (id && CLIENT_ID) {
-      supabaseClient.rpc('increment_click_count', { row_id: id });
-  }
-  // 2. 寫入 Log (新功能)
+  if (id && CLIENT_ID) supabaseClient.rpc('increment_click_count', { row_id: id });
   logToCloud(q, a, 'button');
 
   setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
 }
 
-// 修改後的文字發送處理
+// 核心發送邏輯 (包含人格引擎)
 function handleSend() {
   const input = document.getElementById("userInput"); const text = input.value.trim();
   if(!text) return;
   addNode("user", text); input.value = ""; showProcessing();
   
-  let ans = "如需詳細服務，請點擊上方按鈕聯絡專人。";
+  let ans = null;
+  // 1. 搜尋資料庫
   if (currentQnA.length > 0) {
     for(let f of currentQnA) {
         if(text.includes(f.question)) { ans = f.answer; break; }
     }
   }
   
-  // 寫入 Log (新功能)
+  // 2. 如果沒答案，使用人格引擎隨機回覆
+  if (!ans) {
+      const randomIndex = Math.floor(Math.random() * fallbackMessages.length);
+      ans = fallbackMessages[randomIndex];
+  }
+  
   logToCloud(text, ans, 'text');
 
   setTimeout(() => { removeProcessing(); addNode("bot", ans); }, 1000);
