@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <!-- 禁止 Google 翻譯 -->
     <meta name="google" content="notranslate">
-    <title>祐逸 YOYI | Gesture OS</title>
+    <title>祐逸 YOYI | Digital Twin</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Orbitron:wght@500;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
@@ -19,6 +19,7 @@
         html, body {
             margin: 0; height: 100%; overflow: hidden;
             background-color: #000; color: #fff;
+            /* 預設字體改為 Noto Sans TC 以支援優美中文 */
             font-family: 'Noto Sans TC', sans-serif;
         }
 
@@ -30,7 +31,7 @@
         }
         .logo-group { pointer-events: auto; display: flex; align-items: center; gap: 15px; text-decoration: none; }
         .logo-img { height: 32px; width: auto; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
-        /* 防止翻譯 class */
+        
         .notranslate { translate: no; }
         .logo-text { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.2rem; letter-spacing: 2px; color: #fff; }
         
@@ -73,6 +74,7 @@
             animation: pulse 2s infinite 1s;
             text-transform: uppercase; opacity: 0; animation-fill-mode: forwards;
             display: flex; flex-direction: column; align-items: center; gap: 10px;
+            font-family: 'Orbitron', sans-serif;
         }
         .gesture-icon { font-size: 24px; }
 
@@ -127,21 +129,55 @@
             width: 100px; height: 25px; background: #000; border-radius: 20px; z-index: 10;
         }
         
+        /* 文案樣式 (賈伯斯修正版) */
         .product-info { text-align: left; }
-        .product-info h2 { 
-            font-family: 'Orbitron', sans-serif; font-size: 4rem; margin-bottom: 20px; 
-            text-transform: uppercase; line-height: 1; word-break: break-word;
+        
+        .hero-title {
+            font-family: 'Noto Sans TC', sans-serif; /* 確保中文漂亮 */
+            font-size: 3.5rem; 
+            line-height: 1.2; 
+            margin-bottom: 25px; 
+            font-weight: 900; 
+            letter-spacing: 2px;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .product-info p { 
-            color: #aaa; font-size: 1.2rem; line-height: 1.6; margin-bottom: 40px; 
-            border-left: 2px solid #fff; padding-left: 20px; 
+        
+        .highlight-text {
+            color: #00f260; 
+            -webkit-text-fill-color: #00f260; 
+            text-shadow: 0 0 20px rgba(0, 242, 96, 0.5);
+        }
+
+        .hero-desc { 
+            color: rgba(255,255,255,0.7); 
+            font-size: 1.1rem; 
+            line-height: 1.8; 
+            margin-bottom: 40px; 
+            border-left: 2px solid #fff; 
+            padding-left: 20px; 
+            max-width: 500px;
+            font-weight: 400;
         }
         
         .cta-btn {
-            display: inline-block; background: #fff; color: #000; padding: 18px 50px; font-weight: 900; border-radius: 4px;
-            text-decoration: none; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+            display: inline-block; 
+            background: #fff; 
+            color: #000; 
+            padding: 15px 40px; 
+            font-weight: 700; 
+            border-radius: 4px;
+            text-decoration: none; 
+            letter-spacing: 1px; 
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
-        .cta-btn:hover { background: #ccc; }
+        .cta-btn:hover { 
+            background: #f0f0f0; 
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.4);
+        }
 
         .footer-stamp { position: absolute; bottom: 30px; width: 100%; text-align: center; color: #333; font-size: 12px; font-family: 'Orbitron', monospace; }
 
@@ -181,9 +217,9 @@
                 width: 260px; height: 520px; /* 手機上縮小 */
                 order: -1; /* 讓手機排在文字上面 */
             }
-            .product-info { text-align: center; }
-            .product-info h2 { font-size: 2.5rem; }
-            .product-info p { border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 30px auto; }
+            .product-info { text-align: center; display: flex; flex-direction: column; align-items: center; }
+            .hero-title { font-size: 2.5rem; line-height: 1.3; } /* 手機標題縮小 */
+            .hero-desc { border: none; padding: 0; font-size: 1rem; width: 90%; margin: 0 auto 30px auto; }
             .gesture-hint { bottom: 80px; } 
         }
     </style>
@@ -211,7 +247,7 @@
             </div>
         </section>
 
-        <!-- 第二屏：懸浮手機 -->
+        <!-- 第二屏：懸浮手機 + 新文案 -->
         <section class="product-section">
             <div class="product-container">
                 
@@ -219,20 +255,26 @@
                 <a href="SA.html" class="phone-mockup-wrapper">
                     <div class="phone-bezel">
                         <div class="notch"></div>
-                        <!-- 請確保上傳了 mobile_cover.png -->
+                        <!-- 確保圖片連結正確 -->
                         <img src="mobile_cover.png" alt="YOYI OS Interface" onerror="this.src='https://via.placeholder.com/320x650/000/0f0?text=UPLOAD+MOBILE+PNG';">
                     </div>
                 </a>
 
-                <!-- 右側：文字介紹 -->
+                <!-- 右側：文字介紹 (賈伯斯版：數位分身) -->
                 <div class="product-info">
-                    <h2 class="notranslate">LOOP<br>PROTOCOL</h2>
-                    <p>
-                        重塑溝通。<br>
-                        這不是單純的問答，這是思維的延伸。<br>
-                        讓 AI 接管繁瑣，你只負責決策。
+                    <h2 class="hero-title">
+                        你的<br>
+                        <span class="highlight-text">數位分身</span>
+                    </h2>
+                    
+                    <p class="hero-desc">
+                        在這個過度連結的世界，你需要一個專屬的空間。<br><br>
+                        它不只是問答工具，它是你的語氣、你的故事、你的品味。
+                        讓這個分身替你與世界對話，傳遞你的心意。<br><br>
+                        即使你離線了，你的溫暖依然存在。
                     </p>
-                    <a href="SA.html" class="cta-btn">探索產品 -></a>
+                    
+                    <a href="SA.html" class="cta-btn">啟用我的分身 -></a>
                 </div>
             </div>
             <div class="footer-stamp">© 2025 YOYI Inc. Designed in the Future.</div>
@@ -241,7 +283,7 @@
     </div>
 
     <script>
-        // 手勢引擎
+        // 手勢引擎 (保持不變)
         const viewport = document.getElementById('viewport');
         const cursor = document.getElementById('cursor');
         let currentSection = 0;
