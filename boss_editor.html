@@ -226,8 +226,34 @@ function copyLink() {
     alert("連結已複製！");
 }
 
+// ★★★ 核心修正：自動開戶邏輯 (Auto-Create Profile) ★★★
 async function loadProfile() {
-    const { data } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+    // 1. 嘗試讀取檔案
+    let { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
+    
+    // 2. 如果找不到檔案 (PGRST116) 代表是新用戶 -> 自動建立
+    if (error && error.code === 'PGRST116') {
+        console.log("偵測到新用戶，正在初始化神經網路...");
+        const newProfile = {
+            id: currentUser.id,
+            email: currentUser.email,
+            brand_name: "我的 YOYI 分身",
+            welcome_msg: "你好，我是你的 AI 助理，請問有什麼我可以幫你的？",
+            theme_color: '#00f260',
+            updated_at: new Date()
+        };
+        // 寫入資料庫
+        const { data: createdProfile, error: createError } = await supabaseClient.from('profiles').insert([newProfile]).select().single();
+        
+        if (createError) {
+            console.error("初始化失敗:", createError);
+            alert("系統初始化失敗，請聯繫管理員。");
+            return;
+        }
+        data = createdProfile; // 使用剛建立的檔案
+    }
+
+    // 3. 填入資料到介面
     if (data) {
         document.getElementById('shopNameInput').value = data.brand_name || '';
         document.getElementById('welcomeInput').value = data.welcome_msg || '';
@@ -247,9 +273,7 @@ async function loadQnA() {
     if (data) { appState.qaList = data; renderQA(); }
 }
 
-// ★★★ 核心修正：數據讀取與顯示 ★★★
 async function loadAnalytics() {
-    // 1. 載入點擊排行 (qna_rules)
     const { data: stats } = await supabaseClient
         .from('qna_rules')
         .select('question, click_count')
@@ -262,10 +286,9 @@ async function loadAnalytics() {
         statsDiv.innerHTML = '<div style="opacity:0.5; font-size:12px;">NO DATA YET</div>';
     } else {
         statsDiv.innerHTML = '';
-        // 修正：如果完全沒點擊，click_count 為 0，避免除以 0 錯誤
         const max = (stats[0] && stats[0].click_count > 0) ? stats[0].click_count : 1; 
         stats.forEach(item => {
-            const count = item.click_count || 0; // 確保顯示 0 而不是 undefined
+            const count = item.click_count || 0;
             const percent = (count / max) * 100;
             statsDiv.innerHTML += `
                 <div class="stat-row">
@@ -275,13 +298,12 @@ async function loadAnalytics() {
         });
     }
 
-    // 2. 載入 Logs (chat_logs)
     const { data: logs } = await supabaseClient
         .from('chat_logs')
         .select('*')
         .eq('user_id', currentUser.id)
         .order('created_at', {ascending: false})
-        .limit(6); // 多抓一筆
+        .limit(6);
 
     const logsDiv = document.getElementById('logsContainer');
     if (!logs || logs.length === 0) {
@@ -290,7 +312,6 @@ async function loadAnalytics() {
         logsDiv.innerHTML = '';
         logs.forEach(log => {
             const time = new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            // 判斷來源類型，給予不同標籤顏色
             let typeTag = '';
             if (log.type === 'button') typeTag = '<span class="log-tag" style="background:#4776E6;">BUTTON</span>';
             else if (log.type === 'input') typeTag = '<span class="log-tag" style="background:#FF512F;">INPUT</span>';
@@ -306,10 +327,12 @@ async function loadAnalytics() {
     }
 }
 
+// ★★★ 核心修正：儲存邏輯改為 UPSERT (更安全) ★★★
 async function saveData() {
     const btn = document.getElementById('saveBtn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
     
     const updates = {
+        id: currentUser.id, // 確保有 ID，讓 upsert 知道是哪一筆
         brand_name: document.getElementById('shopNameInput').value,
         welcome_msg: document.getElementById('welcomeInput').value,
         link_phone: document.getElementById('phoneInput').value,
@@ -321,7 +344,9 @@ async function saveData() {
         theme_color: appState.themeColor,
         updated_at: new Date()
     };
-    await supabaseClient.from('profiles').update(updates).eq('id', currentUser.id);
+    
+    // 使用 upsert 取代 update，如果資料不存在會自動建立
+    await supabaseClient.from('profiles').upsert(updates);
 
     for (const item of appState.qaList) {
         if (item.isDirty) { 
@@ -331,7 +356,7 @@ async function saveData() {
     }
     
     await loadQnA();
-    await loadAnalytics(); // 儲存後也重新整理數據
+    await loadAnalytics();
     btn.innerText = "SUCCESS"; btn.style.background = "#00ff88"; btn.style.color = "#000";
     setTimeout(() => { btn.innerText = "DEPLOY CHANGES"; btn.style.background = "#fff"; btn.style.color="#000"; btn.disabled = false; }, 2000);
 }
