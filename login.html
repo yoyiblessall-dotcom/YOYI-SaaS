@@ -116,27 +116,32 @@
   .orbit-bar::-webkit-scrollbar { display: none; }
 
   /* 按鈕本體 (還原玻璃質感) */
-  .orbit-chip {
-    flex: 0 0 auto; 
-    height: 36px;
-    padding: 0 16px;
-    background: rgba(20, 20, 20, 0.6); /* 半透明黑底 */
-    border: 1px solid rgba(255,255,255,0.2); 
-    color: rgba(255,255,255,0.8); 
-    font-size: 13px; letter-spacing: 0.5px;
-    cursor: pointer; transition: 0.3s; 
-    backdrop-filter: blur(8px); 
-    white-space: nowrap; font-family: inherit; 
-    border-radius: 4px; /* 方形圓角 */
-    display: flex; align-items: center; justify-content: center;
-  }
-  /* 按鈕懸停/激活 */
-  .orbit-chip:hover, .orbit-chip:active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0, 242, 96, 0.1); /* 微微發光 */
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  }
+.orbit-chip {
+  flex: 0 0 auto; 
+  height: 38px; /* 稍微增高一點點，更霸氣 */
+  padding: 0 18px;
+  background: rgba(0, 0, 0, 0.7); /* 底色更深，對比更強 */
+  border: 1px solid rgba(255,255,255,0.4); /* 邊框更亮 */
+  color: #ffffff; /* 純白文字，不再半透明 */
+  font-size: 14px; /* 字體加大 1px */
+  letter-spacing: 1px;
+  font-weight: 600; /* 加粗！這很重要 */
+  cursor: pointer; transition: 0.3s; 
+  backdrop-filter: blur(10px); 
+  white-space: nowrap; font-family: inherit; 
+  border-radius: 6px; 
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* 增加立體感 */
+}
+
+/* 懸停效果強化 */
+.orbit-chip:hover, .orbit-chip:active {
+  border-color: var(--accent);
+  color: #000; /* 滑鼠移上去變黑字 */
+  background: var(--accent); /* 背景直接變亮色 */
+  box-shadow: 0 0 20px var(--glow); /* 強烈發光 */
+  font-weight: 700;
+}
 
   /* 右側箭頭指引 (還原圖2樣式) */
   .scroll-btn-right {
@@ -149,14 +154,35 @@
     pointer-events: auto; /* 確保可點擊 */
     display: none; /* JS 控制顯示 */
   }
-  .scroll-circle {
-      width: 30px; height: 30px; 
-      border-radius: 50%; 
-      background: rgba(255,255,255,0.1); 
-      border: 1px solid var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(5px);
-  }
+.scroll-circle {
+    width: 36px; height: 36px; /* 加大 */
+    border-radius: 50%; 
+    background: rgba(0, 0, 0, 0.9); /* 深黑底，突顯光圈 */
+    border: 2px solid var(--accent); /* 邊框加粗！ */
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 15px var(--glow); /* 加上霓虹光暈 */
+    font-size: 16px; /* 箭頭圖示加大 */
+    animation: pulseGlow 1.5s infinite alternate; /* 呼吸燈動畫 */
+}
+
+/* 讓整塊區域更容易點擊 */
+.scroll-btn-right {
+  position: absolute; right: 0; top: 0; bottom: 0; 
+  width: 70px; /* 點擊熱區加大 */
+  background: linear-gradient(to left, #000 30%, transparent); 
+  display: flex; align-items: center; justify-content: center;
+  z-index: 30; cursor: pointer;
+  pointer-events: auto; 
+  display: none; 
+}
+
+/* 新增呼吸燈動畫 */
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 5px var(--glow); transform: scale(1); }
+  100% { box-shadow: 0 0 20px var(--accent), 0 0 10px #fff; transform: scale(1.1); }
+}
 
   @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
 
@@ -285,18 +311,14 @@ let currentQnA = [];
 // 人格引擎：隨機語錄庫 (Warm & Humorous Fallback)
 // ========================================================
 const fallbackMessages = [
-    "這個問題很有深度... 你的直覺告訴你答案是什麼呢？ 🤔",
-    "系統正在運算... 但我覺得你心裡其實已經有答案了，對嗎？ ✨",
-    "哇，這問題讓我這個 AI 都陷入深思了。如果是你，你會怎麼做？ 🤖",
-    "嘿！別急，有時候慢下來，答案就會像極光一樣浮現 🍃",
-    "我看見你的焦慮了，深呼吸... 你比你自己想像的更強大！ 💪",
-    "這有點超出我的資料庫範圍，但我感受到你的熱情了！要不要換個角度想？ 🔥",
-    "與其找標準答案，不如創造屬於你的規則？這才是駭客精神啊！ 🎨",
-    "這問題太棒了！但我老闆可能比較知道細節，要不要點上面的 LINE 問問他？ 😂",
-    "生活總是充滿未知，這正是它有趣的地方，不是嗎？ 🚀",
-    "你覺得這個問題的背後，真正的核心是什麼？ 🔮",
-    "如果這是電影情節，主角（也就是你）接下來會做什麼決定？ 🎬",
-    "嗯... 我還在學習人類的情感，但這個問題聽起來對你很重要。 ❤️"
+    "這個問題我還沒被「本尊」輸入記憶... 😅 但我已經把你打的內容記下來了！下次說不定就會有這個按鈕囉！",
+    "哇，這題超出了我的資料庫！📂 我把這句話存入後台了，晚點讓我的真實身分親自來看。",
+    "我是他的 AI 分身，這題有點太深奧了！🤖 建議你先點點看下方的按鈕，那是他最想跟你分享的事。",
+    "我看不太懂這個關鍵字... 🤔 不過沒關係，你的留言我收到了！這會幫助我變得更聰明。",
+    "這個話題很有趣！但我目前只懂下方按鈕的內容。👇 要不要先看看那邊？或者直接點上方連結找我的本尊？",
+    "抱歉，我的大腦還在擴充中... ⚡ 你的輸入已經成為我的學習養分！如果有急事，請直接按上方的電話或 LINE 喔！",
+    "嘿！這題我答不出來 😂。但我老闆（也就是我本尊）稍後會在後台看到你問了這個，期待他更新答案吧！",
+    "看來你對這個很有興趣！👀 雖然我現在無法回答，但你可以試試看滑動下方的按鈕，也許有類似的驚喜？"
 ];
 
 // ========================================================
@@ -460,41 +482,79 @@ async function logToCloud(msg, response, type) {
     ]).then(({ error }) => { if(error) console.error("Log Error:", error); });
 }
 
-function handleInput(q, a, id) {
-  addNode("user", q);
+function handleSend() {
+  const input = document.getElementById("userInput"); 
+  const text = input.value.trim();
+  if(!text) return;
+
+  // 1. 顯示使用者訊息
+  addNode("user", text); 
+  input.value = ""; 
   showProcessing();
   
-  if (id && CLIENT_ID) supabaseClient.rpc('increment_click_count', { row_id: id });
-  logToCloud(q, a, 'button');
-
-  setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
-}
-
-// 核心發送邏輯 (包含人格引擎)
-function handleSend() {
-  const input = document.getElementById("userInput"); const text = input.value.trim();
-  if(!text) return;
-  addNode("user", text); input.value = ""; showProcessing();
-  
   let ans = null;
-  // 1. 搜尋資料庫
+  let isFallback = false; // 標記是否為隨機回覆
+  
+  // 2. 搜尋資料庫
   if (currentQnA.length > 0) {
     for(let f of currentQnA) {
-        if(text.includes(f.question)) { ans = f.answer; break; }
+        if (f.question && text.includes(f.question)) { 
+            ans = f.answer; 
+            break; 
+        }
     }
   }
   
-  // 2. 如果沒答案，使用人格引擎隨機回覆
+  // 3. 如果沒答案，使用 OS 風格回覆
   if (!ans) {
       const randomIndex = Math.floor(Math.random() * fallbackMessages.length);
       ans = fallbackMessages[randomIndex];
+      isFallback = true; // 標記這是系統提示
   }
   
   logToCloud(text, ans, 'text');
 
-  setTimeout(() => { removeProcessing(); addNode("bot", ans); }, 1000);
+  // 4. 延遲顯示 (如果是系統提示，用特殊樣式)
+  setTimeout(() => { 
+      removeProcessing(); 
+      if (isFallback) {
+          addNode("sys-msg", ans); // 用新的 class
+      } else {
+          addNode("bot", ans); // 正常的回答
+      }
+  }, 600); // 系統回報速度要快一點，展現效能
 }
 
+.node.sys-msg .node-text {
+    color: #00ffff; /* 青色文字 (Cyan) */
+    font-size: 13px;
+    font-weight: 500;
+    border-left: 2px solid #00ffff;
+    padding-left: 12px;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), transparent); /* 淡淡的背景拖尾 */
+    border-radius: 0 4px 4px 0;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+
+// 修改 addNode 以支援 sys-msg
+function addNode(role, text) {
+  const body = document.getElementById("chatBody");
+  const node = document.createElement("div"); 
+  
+  // 如果是 sys-msg，它其實也是 bot 的一種變體，但我們給它特殊的 class
+  if (role === 'sys-msg') {
+      node.className = `node bot sys-msg`;
+  } else {
+      node.className = `node ${role}`;
+  }
+  
+  node.innerHTML = `<div class="node-text">${text.replace(/\n/g, '<br>')}</div>`;
+  body.appendChild(node); 
+  body.scrollTop = body.scrollHeight;
+}
 function addNode(role, text) {
   const body = document.getElementById("chatBody");
   const node = document.createElement("div"); node.className = `node ${role}`;
