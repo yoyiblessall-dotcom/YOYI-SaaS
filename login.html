@@ -10,10 +10,10 @@
 
 <style>
   /* =========================================
-     CORE AESTHETICS (視覺核心 - 勿動)
+     CORE AESTHETICS (保留你的原本設計)
      ========================================= */
   :root {
-    --accent: #00f260; /* 預設綠色，會被 JS 覆蓋 */
+    --accent: #00f260; 
     --glow: rgba(0, 242, 96, 0.4);
     --bg-deep: #000;
     --glass: rgba(255, 255, 255, 0.05);
@@ -88,22 +88,17 @@
   .node.bot .node-text { color: rgba(255,255,255,0.95); }
   .node.user .node-text { color: var(--accent); text-align: right; }
 
-  /* === 新增：系統提示 (分身悄悄話) 樣式 === */
-  /* 這是你剛剛不小心貼到 Script 裡的代碼，我幫你移回來了 */
+  /* 系統提示訊息 */
   .node.sys-msg .node-text {
-    color: #00ffff; /* 青色文字 (Cyan) */
-    font-size: 13px;
-    font-weight: 500;
-    border-left: 2px solid #00ffff;
-    padding-left: 12px;
-    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), transparent); /* 淡淡的背景拖尾 */
-    border-radius: 0 4px 4px 0;
-    line-height: 1.6;
-    letter-spacing: 0.5px;
+    color: #00ffff;
+    font-size: 13px; font-weight: 500;
+    border-left: 2px solid #00ffff; padding-left: 12px;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), transparent);
+    border-radius: 0 4px 4px 0; line-height: 1.6; letter-spacing: 0.5px;
     text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
   }
 
-  /* 底部操作區 (包含按鈕列與輸入框) */
+  /* 底部操作區 */
   .monolith-dock {
     flex: 0 0 auto; 
     padding: 0 0 calc(20px + env(safe-area-inset-bottom)) 0;
@@ -112,96 +107,46 @@
     position: relative;
   }
 
-  /* 捲動按鈕區外框 */
-  .orbit-wrapper { 
-    position: relative; 
-    width: 100%; 
-    display: flex; 
-    align-items: center; 
-    height: 50px; /* 固定高度防止跑版 */
-  }
-
-  /* 橫向捲動條 */
+  .orbit-wrapper { position: relative; width: 100%; display: flex; align-items: center; height: 50px; }
   .orbit-bar {
     display: flex; gap: 10px; overflow-x: auto; padding: 0 24px;
     scrollbar-width: none; flex: 1; scroll-behavior: smooth;
-    align-items: center; height: 100%;
-    padding-right: 60px; /* 預留右邊給箭頭的空間 */
+    align-items: center; height: 100%; padding-right: 60px;
   }
   .orbit-bar::-webkit-scrollbar { display: none; }
 
-  /* 按鈕本體 (還原玻璃質感) */
   .orbit-chip {
-    flex: 0 0 auto; 
-    height: 38px; /* 稍微增高一點點，更霸氣 */
-    padding: 0 18px;
-    background: rgba(0, 0, 0, 0.7); /* 底色更深，對比更強 */
-    border: 1px solid rgba(255,255,255,0.4); /* 邊框更亮 */
-    color: #ffffff; /* 純白文字，不再半透明 */
-    font-size: 14px; /* 字體加大 1px */
-    letter-spacing: 1px;
-    font-weight: 600; /* 加粗！這很重要 */
-    cursor: pointer; transition: 0.3s; 
-    backdrop-filter: blur(10px); 
-    white-space: nowrap; font-family: inherit; 
-    border-radius: 6px; 
+    flex: 0 0 auto; height: 38px; padding: 0 18px;
+    background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.4);
+    color: #ffffff; font-size: 14px; letter-spacing: 1px; font-weight: 600;
+    cursor: pointer; transition: 0.3s; backdrop-filter: blur(10px); 
+    white-space: nowrap; font-family: inherit; border-radius: 6px; 
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* 增加立體感 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   }
-
-  /* 懸停效果強化 */
   .orbit-chip:hover, .orbit-chip:active {
-    border-color: var(--accent);
-    color: #000; /* 滑鼠移上去變黑字 */
-    background: var(--accent); /* 背景直接變亮色 */
-    box-shadow: 0 0 20px var(--glow); /* 強烈發光 */
-    font-weight: 700;
+    border-color: var(--accent); color: #000; background: var(--accent);
+    box-shadow: 0 0 20px var(--glow); font-weight: 700;
   }
 
-  /* 右側箭頭指引 (還原圖2樣式) */
   .scroll-btn-right {
     position: absolute; right: 0; top: 0; bottom: 0; 
-    width: 60px; /* 寬度足夠蓋住 */
-    background: linear-gradient(to left, #000 40%, transparent); /* 漸層消失 */
+    width: 70px; background: linear-gradient(to left, #000 30%, transparent); 
     display: flex; align-items: center; justify-content: center;
-    z-index: 30; cursor: pointer; color: var(--accent);
-    animation: bounceRight 2s infinite;
-    pointer-events: auto; /* 確保可點擊 */
-    display: none; /* JS 控制顯示 */
+    z-index: 30; cursor: pointer; pointer-events: auto; display: none; 
   }
   .scroll-circle {
-      width: 36px; height: 36px; /* 加大 */
-      border-radius: 50%; 
-      background: rgba(0, 0, 0, 0.9); /* 深黑底，突顯光圈 */
-      border: 2px solid var(--accent); /* 邊框加粗！ */
-      color: var(--accent);
+      width: 36px; height: 36px; border-radius: 50%; 
+      background: rgba(0, 0, 0, 0.9); border: 2px solid var(--accent); color: var(--accent);
       display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 0 15px var(--glow); /* 加上霓虹光暈 */
-      font-size: 16px; /* 箭頭圖示加大 */
-      animation: pulseGlow 1.5s infinite alternate; /* 呼吸燈動畫 */
+      backdrop-filter: blur(5px); box-shadow: 0 0 15px var(--glow); font-size: 16px;
+      animation: pulseGlow 1.5s infinite alternate;
   }
-
-  /* 讓整塊區域更容易點擊 */
-  .scroll-btn-right {
-    position: absolute; right: 0; top: 0; bottom: 0; 
-    width: 70px; /* 點擊熱區加大 */
-    background: linear-gradient(to left, #000 30%, transparent); 
-    display: flex; align-items: center; justify-content: center;
-    z-index: 30; cursor: pointer;
-    pointer-events: auto; 
-    display: none; 
-  }
-
-  /* 新增呼吸燈動畫 */
   @keyframes pulseGlow {
     0% { box-shadow: 0 0 5px var(--glow); transform: scale(1); }
     100% { box-shadow: 0 0 20px var(--accent), 0 0 10px #fff; transform: scale(1.1); }
   }
 
-  @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
-
-  /* 輸入框區域 */
   .core-input-wrapper {
     margin: 0 24px; height: 50px;
     border-bottom: 1px solid rgba(255,255,255,0.2);
@@ -297,7 +242,6 @@
 <div class="monolith-dock">
   <div class="orbit-wrapper">
     <div class="orbit-bar" id="quickActions"></div>
-    <!-- 箭頭指引 (右側漸層 + 按鈕) -->
     <div class="scroll-btn-right" id="scrollArrow" onclick="scrollMenu()">
         <div class="scroll-circle">
             <i class="fas fa-chevron-right"></i>
@@ -360,7 +304,10 @@ async function init() {
     setTimeout(() => {
         document.getElementById("bootLayer").style.opacity = 0;
         setTimeout(()=> document.getElementById("bootLayer").style.display = "none", 1000);
-        setTimeout(() => { addNode("bot", profile.welcome_msg || "SYSTEM READY."); }, 500);
+        setTimeout(() => { 
+            // 如果有歡迎語就用歡迎語，沒有就用預設
+            addNode("bot", profile.welcome_msg || "SYSTEM READY."); 
+        }, 500);
     }, 1500);
 
   } catch (e) {
@@ -372,8 +319,9 @@ async function init() {
 
 function applyTheme(profile) {
   document.getElementById('brandTitle').innerText = profile.brand_name || "STANDALONE";
-  document.title = profile.brand_name || "STANDALONE OS";
+  document.title = `${profile.brand_name || 'YOYI'} | AI`;
   const root = document.documentElement;
+  // 如果資料庫有顏色就用，沒有就用預設綠
   const color = profile.theme_color || '#00f260';
   root.style.setProperty('--accent', color);
   root.style.setProperty('--glow', color);
@@ -386,7 +334,7 @@ function applyTheme(profile) {
 function renderSocials(profile) {
     const deck = document.getElementById('socialDeck'); deck.innerHTML = '';
     
-    // 1. 定義連結與類型
+    // 定義連結與類型
     const links = [
         { icon: 'fas fa-phone', val: profile.link_phone, type: 'tel' },
         { icon: 'fas fa-envelope', val: profile.link_mail, type: 'mailto' },
@@ -401,33 +349,18 @@ function renderSocials(profile) {
             const a = document.createElement('a'); a.className = 'nav-btn';
             let href = link.val.trim(); 
             
-            // === 2. 依照類型進行智慧轉換 ===
-
-            if (link.type === 'tel') {
-                href = `tel:${href}`;
-            } 
-            else if (link.type === 'mailto') {
-                href = `mailto:${href}`;
-            } 
-            // LINE 完美邏輯
+            // 智慧連結轉換
+            if (link.type === 'tel') href = `tel:${href}`;
+            else if (link.type === 'mailto') href = `mailto:${href}`;
             else if (link.type === 'line') {
-                if (href.startsWith('http')) { /* do nothing */ }
+                if (href.startsWith('http')) {} 
                 else if (href.startsWith('@')) href = `https://line.me/R/ti/p/${href}`;
                 else href = `https://line.me/ti/p/~${href}`;
             }
-            // IG/FB/Threads 自動補全
-            else if (link.type === 'ig') {
-                if (!href.startsWith('http')) href = `https://www.instagram.com/${href.replace('@', '')}`;
-            }
-            else if (link.type === 'fb') {
-                if (!href.startsWith('http')) href = `https://www.facebook.com/${href}`;
-            }
-            else if (link.type === 'threads') {
-                if (!href.startsWith('http')) href = `https://www.threads.net/@${href.replace('@', '')}`;
-            }
-            else {
-                if (!href.startsWith('http')) href = `https://${href}`;
-            }
+            else if (link.type === 'ig' && !href.startsWith('http')) href = `https://www.instagram.com/${href.replace('@', '')}`;
+            else if (link.type === 'fb' && !href.startsWith('http')) href = `https://www.facebook.com/${href}`;
+            else if (link.type === 'threads' && !href.startsWith('http')) href = `https://www.threads.net/@${href.replace('@', '')}`;
+            else if (!href.startsWith('http') && link.type !== 'tel' && link.type !== 'mailto') href = `https://${href}`;
 
             a.href = href; 
             a.target = '_blank';
@@ -446,6 +379,7 @@ function updateOrbit(faqs) {
     faqs.forEach(item => {
       const chip = document.createElement("button"); chip.className = "orbit-chip";
       chip.innerText = item.question;
+      // 點擊事件：呼叫 handleInput
       chip.onclick = () => handleInput(item.question, item.answer, item.id);
       bar.appendChild(chip);
     });
@@ -465,16 +399,13 @@ function scrollMenu() {
     const bar = document.getElementById("quickActions");
     bar.scrollBy({ left: 150, behavior: 'smooth' });
 }
-// 監聽捲動以隱藏箭頭
 document.getElementById("quickActions").addEventListener("scroll", function() {
    const bar = this;
    const arrow = document.getElementById("scrollArrow");
    if(bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 10) {
-       arrow.style.opacity = "0"; 
-       arrow.style.pointerEvents = "none";
+       arrow.style.opacity = "0"; arrow.style.pointerEvents = "none";
    } else {
-       arrow.style.opacity = "1";
-       arrow.style.pointerEvents = "auto";
+       arrow.style.opacity = "1"; arrow.style.pointerEvents = "auto";
    }
 });
 
@@ -483,26 +414,28 @@ document.getElementById("quickActions").addEventListener("scroll", function() {
 // ========================================================
 async function logToCloud(msg, response, type) {
     if (!CLIENT_ID) return;
-    supabaseClient.from('chat_logs').insert([
+    // 寫入對話紀錄
+    const { error } = await supabaseClient.from('chat_logs').insert([
         { user_id: CLIENT_ID, message: msg, bot_response: response, type: type }
-    ]).then(({ error }) => { if(error) console.error("Log Error:", error); });
+    ]);
+    if(error) console.error("Log Error:", error);
 }
 
-// 補回遺失的 handleInput 函數
-function handleInput(q, a, id) {
+async function handleInput(q, a, id) {
   addNode("user", q);
   showProcessing();
   
-  // 1. 這裡只做加分
+  // 1. 點擊次數加分 (如果 id 存在)
   if (id && CLIENT_ID) {
-      console.log("正在嘗試加分 ID:", id); // 除錯用
-      supabaseClient.rpc('increment_click_count', { row_id: id }).then(res => {
-          if(res.error) console.error("加分失敗:", res.error);
-          else console.log("加分成功!");
-      });
+      // 先讀取目前的 click_count
+      const { data: current } = await supabaseClient.from('qna_rules').select('click_count').eq('id', id).single();
+      if (current) {
+          // 更新 click_count + 1
+          await supabaseClient.from('qna_rules').update({ click_count: (current.click_count || 0) + 1 }).eq('id', id);
+      }
   }
   
-  // 2. 這裡只觸發 UI 顯示，logToCloud 會在內部判斷 type='button' 而不寫入
+  // 2. 寫入 Log (type='button')
   logToCloud(q, a, 'button'); 
   
   setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
@@ -511,24 +444,51 @@ function handleInput(q, a, id) {
 function handleSend() {
   const input = document.getElementById("userInput"); const text = input.value.trim(); if(!text) return;
   addNode("user", text); input.value = ""; showProcessing();
-  let ans = null; let isFallback = false;
-  if (currentQnA.length > 0) { for(let f of currentQnA) { if (f.question && text.includes(f.question)) { ans = f.answer; break; } } }
-  if (!ans) { const randomIndex = Math.floor(Math.random() * fallbackMessages.length); ans = fallbackMessages[randomIndex]; isFallback = true; }
   
-  // 這裡 type 是 'text'，所以會寫入 Log
+  let ans = null; let isFallback = false;
+  // 簡單關鍵字比對
+  if (currentQnA.length > 0) { 
+      for(let f of currentQnA) { 
+          if (f.question && text.includes(f.question)) { ans = f.answer; break; } 
+      } 
+  }
+  // 沒對中，隨機挑選一句 Fallback
+  if (!ans) { 
+      const randomIndex = Math.floor(Math.random() * fallbackMessages.length); 
+      ans = fallbackMessages[randomIndex]; 
+      isFallback = true; 
+  }
+  
+  // 寫入 Log (type='text')
   logToCloud(text, ans, 'text');
 
-  setTimeout(() => { removeProcessing(); if (isFallback) { addNode("sys-msg", ans); } else { addNode("bot", ans); } }, 600); 
+  setTimeout(() => { 
+      removeProcessing(); 
+      if (isFallback) { addNode("sys-msg", ans); } 
+      else { addNode("bot", ans); } 
+  }, 600); 
 }
 
 function addNode(role, text) {
-  const body = document.getElementById("chatBody"); const node = document.createElement("div"); 
-  if (role === 'sys-msg') { node.className = `node bot sys-msg`; } else { node.className = `node ${role}`; }
+  const body = document.getElementById("chatBody"); 
+  const node = document.createElement("div"); 
+  if (role === 'sys-msg') { node.className = `node bot sys-msg`; } 
+  else { node.className = `node ${role}`; }
+  
   node.innerHTML = `<div class="node-text">${text.replace(/\n/g, '<br>')}</div>`;
   body.appendChild(node); body.scrollTop = body.scrollHeight;
 }
-function showProcessing() { const body = document.getElementById("chatBody"); const node = document.createElement("div"); node.id = "procNode"; node.className = "node bot"; node.innerHTML = `<div class="node-text" style="opacity:0.6; font-size:12px; letter-spacing:1px;">COMPUTING...</div>`; body.appendChild(node); body.scrollTop = body.scrollHeight; }
+
+function showProcessing() { 
+    const body = document.getElementById("chatBody"); 
+    const node = document.createElement("div"); 
+    node.id = "procNode"; node.className = "node bot"; 
+    node.innerHTML = `<div class="node-text" style="opacity:0.6; font-size:12px; letter-spacing:1px;">COMPUTING...</div>`; 
+    body.appendChild(node); body.scrollTop = body.scrollHeight; 
+}
+
 function removeProcessing() { const el = document.getElementById("procNode"); if(el) el.remove(); }
+
 document.getElementById("userInput").addEventListener("keypress", (e) => { if(e.key==="Enter") handleSend(); });
 
 init();
