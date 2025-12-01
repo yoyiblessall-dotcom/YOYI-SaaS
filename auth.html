@@ -66,7 +66,7 @@
             cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
         .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); }
-        .btn-primary:disabled { background: #555; cursor: not-allowed; } /* 讀取中樣式 */
+        .btn-primary:disabled { background: #555; cursor: not-allowed; } 
         
         .divider {
             display: flex; align-items: center; margin: 25px 0;
@@ -127,14 +127,15 @@
 
         <div class="divider"><span>OR CONTINUE WITH</span></div>
 
+        <!-- 社交按鈕群組 (更新為 Google / LINE / Facebook) -->
         <button class="social-btn" onclick="socialLogin('google')">
             <i class="fab fa-google" style="color: #DB4437;"></i> Google 帳號登入
         </button>
         <button class="social-btn" onclick="socialLogin('line')">
             <i class="fab fa-line" style="color: #00C300;"></i> LINE 帳號登入
         </button>
-        <button class="social-btn" onclick="socialLogin('apple')">
-            <i class="fab fa-apple"></i> Apple ID 登入
+        <button class="social-btn" onclick="socialLogin('facebook')">
+            <i class="fab fa-facebook-f" style="color: #1877F2;"></i> Facebook 登入
         </button>
 
         <div class="switch-mode">
@@ -146,14 +147,13 @@
     <script>
         // ========== YOYI 核心連線設定 ==========
         
-        // 1. 初始化 Supabase 客戶端
+        // 1. 初始化 Supabase 客戶端 (已配置你的 Key)
         const supabaseUrl = 'https://skkjzquxollefddyhtxt.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNra2p6cXV4b2xsZWZkZHlodHh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTQ4NzMsImV4cCI6MjA4MDA3MDg3M30.S0tcaKijsb-rrJuZWeBn9uUr8geu63qKNa-cdgjS12I';
         
-        // 【修正點】：變數名稱改為 supabaseClient，避免跟工具箱名稱衝突
         const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-        console.log("YOYI Auth System Loaded"); // 檢查點：打開 F12 應該要看到這行
+        console.log("YOYI Auth System 2.1 Loaded (FB/Line/Google)");
 
         // ========== 邏輯控制 ==========
         let isLoginMode = true;
@@ -163,7 +163,7 @@
         // 切換 登入/註冊 模式
         function toggleMode() {
             isLoginMode = !isLoginMode;
-            errorMsg.style.display = 'none'; // 清除錯誤訊息
+            errorMsg.style.display = 'none';
             
             if (isLoginMode) {
                 document.getElementById('cardTitle').innerText = "登入以管理您的分身";
@@ -178,33 +178,28 @@
             }
         }
 
-        // 處理表單送出
+        // 處理表單送出 (Email/Password)
         async function handleAuth(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // UI 進入讀取狀態
             submitBtn.disabled = true;
             submitBtn.innerText = "處理中...";
             errorMsg.style.display = 'none';
 
             try {
                 if (isLoginMode) {
-                    // --- 登入邏輯 ---
-                    // 使用 supabaseClient 來呼叫
                     const { data, error } = await supabaseClient.auth.signInWithPassword({
                         email: email,
                         password: password
                     });
                     if (error) throw error;
                     
-                    alert("登入成功！準備跳轉至後台...");
+                    // 登入成功，前往 God Mode
                     window.location.href = 'boss_editor.html';
 
                 } else {
-                    // --- 註冊邏輯 (申請試用) ---
-                    // 使用 supabaseClient 來呼叫
                     const { data, error } = await supabaseClient.auth.signUp({
                         email: email,
                         password: password
@@ -212,24 +207,55 @@
                     if (error) throw error;
 
                     alert("註冊成功！請檢查您的信箱並點擊驗證連結，即可啟用帳號。");
-                    toggleMode(); // 註冊完切回登入
+                    toggleMode();
                 }
             } catch (err) {
-                // 顯示錯誤訊息
                 console.error(err);
                 errorMsg.innerText = "錯誤: " + err.message;
                 errorMsg.style.display = 'block';
             } finally {
-                // UI 恢復正常
                 submitBtn.disabled = false;
                 submitBtn.innerText = isLoginMode ? "登入" : "立即啟用";
             }
         }
 
-        // 第三方登入
+        // ==========================================
+        //  🚀 第三方登入核心 (Social Neurons)
+        // ==========================================
         async function socialLogin(provider) {
-            alert(`正在設定 ${provider} 登入功能... (需在 Supabase 後台開啟 Auth Provider)`);
+            try {
+                const errorDiv = document.getElementById('errorMsg');
+                errorDiv.style.display = 'none';
+                
+                // 設定跳轉回 God Mode
+                const redirectUrl = window.location.origin + '/boss_editor.html';
+
+                const { data, error } = await supabaseClient.auth.signInWithOAuth({
+                    provider: provider,
+                    options: {
+                        redirectTo: redirectUrl,
+                    },
+                });
+
+                if (error) throw error;
+                // 如果成功，瀏覽器會自動引導至授權頁面
+
+            } catch (error) {
+                console.error('Social Login Error:', error);
+                const errorDiv = document.getElementById('errorMsg');
+                errorDiv.innerText = `無法連接 ${provider} : 請確認後台已啟用 (Facebook 需在 Meta Developers 設定)。`;
+                errorDiv.style.display = 'block';
+            }
         }
+        
+        // 自動檢查是否已登入 (Auto-Redirect)
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                window.location.href = 'boss_editor.html';
+            }
+        }
+        checkSession();
     </script>
 </body>
 </html>
