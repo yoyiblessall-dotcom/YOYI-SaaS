@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>祐逸 YOYI | 你的智能回應分身</title>
+<title>祐逸 YOYI | 遇見最好的你</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
@@ -36,6 +36,7 @@
         overflow-x: hidden;
     }
 
+    /* 背景畫布：極光效果 */
     canvas { 
         display: block; 
         position: fixed; 
@@ -43,40 +44,72 @@
         z-index: -1; 
     }
 
+    /* 頂部導航 */
+    .nav-top {
+        position: absolute; top: 20px; right: 20px; z-index: 10;
+    }
+    .nav-btn {
+        color: rgba(255,255,255,0.8); 
+        text-decoration: none; 
+        font-size: 14px; 
+        border: 1px solid rgba(255,255,255,0.2); 
+        padding: 10px 24px; 
+        border-radius: 30px; 
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        font-family: 'Space Grotesk', sans-serif;
+        background: rgba(0,0,0,0.3);
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .nav-btn:hover {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+    }
+
+    /* HERO 區域 */
     .hero {
         min-height: 100vh;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        position: relative; padding: 100px 20px 40px; text-align: center;
+        position: relative; padding: 120px 20px 40px; text-align: center;
     }
 
     .pill {
         display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 50px;
-        font-size: 13px; margin-bottom: 20px; border: 1px solid var(--border);
+        background: rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 50px;
+        font-size: 13px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.15);
         backdrop-filter: blur(5px);
+        letter-spacing: 1px;
         animation: float 3s ease-in-out infinite;
     }
-    .pill i { color: #00ff88; }
+    .pill i { color: #00ff88; font-size: 10px; }
     
     h1 {
-        font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 6vw, 5rem);
-        line-height: 1.1; margin: 0 0 20px 0;
+        font-family: 'Space Grotesk', sans-serif; 
+        font-size: clamp(2.5rem, 5vw, 4.5rem);
+        font-weight: 700;
+        line-height: 1.1; margin: 0 0 24px 0;
         text-shadow: 0 10px 40px rgba(0,0,0,0.8); 
         background: linear-gradient(180deg, #fff 0%, #a5a5a5 100%); 
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
     
-    /* 修正：增加寬度，讓文字能在一行或兩行內優雅呈現 */
     p.subhead { 
-        font-size: 1.2rem; 
+        font-size: clamp(1rem, 1.5vw, 1.2rem); 
         color: var(--text-sub);
         width: 90%;
-        max-width: 800px; /* 從 600 加寬到 800 */
-        line-height: 1.6; margin-bottom: 40px; 
+        max-width: 700px;
+        line-height: 1.8; margin-bottom: 50px; 
         text-shadow: 0 2px 10px rgba(0,0,0,0.8);
     }
 
-    .demo-stage { display: flex; flex-wrap: wrap; justify-content: center; gap: 60px; width: 100%; max-width: 1200px; margin-top: 40px; align-items: center; }
+    /* 演示舞台 */
+    .demo-stage { 
+        display: flex; flex-wrap: wrap; justify-content: center; gap: 60px; 
+        width: 100%; max-width: 1100px; margin-top: 20px; align-items: center; 
+    }
     .demo-controls { flex: 1; min-width: 300px; text-align: left; }
     
     .industry-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px; }
@@ -84,110 +117,168 @@
         background: rgba(255, 255, 255, 0.03); 
         border: 1px solid var(--border); color: #fff;
         padding: 20px; border-radius: 16px; cursor: pointer; transition: 0.3s;
-        display: flex; align-items: center; gap: 10px; font-size: 15px;
+        display: flex; align-items: center; gap: 12px; font-size: 15px;
         backdrop-filter: blur(8px);
     }
     .ind-btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-3px); border-color: rgba(255,255,255,0.3); }
-    .ind-btn.active { border-color: var(--active-color); box-shadow: 0 0 25px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.05); background: rgba(0,0,0,0.4); }
-    
+    .ind-btn.active { 
+        border-color: var(--active-color); 
+        box-shadow: 0 0 30px rgba(0,0,0,0.3), inset 0 0 20px rgba(255,255,255,0.05); 
+        background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+    }
+    .ind-icon { font-size: 18px; color: var(--text-sub); transition: 0.3s; }
+    .ind-btn.active .ind-icon { color: var(--active-color); filter: drop-shadow(0 0 5px var(--active-color)); }
+
+    /* 手機模擬器 */
     .phone-wrapper {
-        position: relative; width: 320px; height: 650px; border-radius: 40px;
-        background: #000; border: 8px solid #1a1a1a; 
+        position: relative; width: 320px; height: 640px; border-radius: 45px;
+        background: #050505; border: 8px solid #2a2a2a; 
         box-shadow: 0 30px 80px rgba(0,0,0,0.8);
         overflow: hidden;
+        transform: rotate(-2deg);
+        transition: transform 0.5s ease;
     }
-    .sim-screen { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; transition: 0.5s; }
+    .phone-wrapper:hover { transform: rotate(0deg) scale(1.02); }
+
+    .sim-screen { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; transition: 0.5s; background: #000; }
+    
+    /* 極光動態背景 (手機內) */
     .sim-aurora {
         position: absolute; inset: -50%;
         background: conic-gradient(from 0deg, transparent, var(--s-c1) 60deg, transparent, var(--s-c2) 180deg, transparent, var(--s-c3) 300deg, transparent);
-        filter: blur(60px); opacity: 0.5; animation: rotate 20s linear infinite; z-index: 0;
+        filter: blur(50px); opacity: 0.4; animation: rotate 15s linear infinite; z-index: 0;
     }
     
-    .sim-header { position: relative; z-index: 2; padding: 40px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; }
-    .sim-brand { font-weight: 700; font-size: 14px; letter-spacing: 1px; }
-    .sim-actions { display: flex; gap: 8px; }
-    .sim-icon-btn { width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; cursor: pointer; transition: 0.3s; }
-    .sim-icon-btn:hover { background: rgba(255,255,255,0.3); }
+    .sim-header { position: relative; z-index: 2; padding: 45px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; }
+    .sim-brand { font-weight: 700; font-size: 15px; letter-spacing: 1px; color: #fff; }
+    .sim-actions { display: flex; gap: 10px; }
+    .sim-icon-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; cursor: pointer; transition: 0.3s; }
+    .sim-icon-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
 
-    .sim-chat { flex: 1; position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: hidden; }
-    .msg { max-width: 85%; padding: 10px 15px; border-radius: 12px; font-size: 13px; line-height: 1.5; animation: popUp 0.4s ease; }
-    .msg.bot { align-self: flex-start; border-left: 2px solid var(--s-accent); color: rgba(255,255,255,0.9); background: rgba(30,30,30,0.8); backdrop-filter: blur(5px); }
-    .msg.user { align-self: flex-end; color: var(--s-accent); text-align: right; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
-    .sim-footer { position: relative; z-index: 2; padding: 15px; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
-    .sim-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; } 
+    .sim-chat { flex: 1; position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; scrollbar-width: none; }
+    .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.5; animation: popUp 0.4s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .msg.bot { 
+        align-self: flex-start; 
+        border-bottom-left-radius: 4px;
+        color: rgba(255,255,255,0.95); 
+        background: rgba(40,40,40,0.7); 
+        backdrop-filter: blur(10px); 
+        border-left: 3px solid var(--s-accent);
+    }
+    .msg.user { 
+        align-self: flex-end; 
+        border-bottom-right-radius: 4px;
+        color: #000000;
+        font-weight: 600 
+        background: var(--s-accent);
+        text-align: right; 
+        box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+    }
+    
+    .sim-footer { position: relative; z-index: 2; padding: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); }
+    
+    /* 搜尋框模擬 */
+    .sim-input-fake {
+        width: 100%; padding: 10px 15px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 20px;
+        font-size: 12px; color: rgba(255,255,255,0.5);
+        margin-bottom: 12px;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    .sim-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; } 
     .sim-chips::-webkit-scrollbar { display: none; }
-    .sim-chip { flex: 0 0 auto; font-size: 11px; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: rgba(255,255,255,0.7); cursor: pointer; background: rgba(0,0,0,0.4); }
-
+    .sim-chip { 
+        flex: 0 0 auto; font-size: 12px; padding: 8px 14px; 
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; 
+        color: rgba(255,255,255,0.8); cursor: pointer; 
+        background: rgba(0,0,0,0.2); transition: 0.2s; 
+    }
+    .sim-chip:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
     .sim-chip.auto-active {
-        background: rgba(255, 255, 255, 0.9);
-        color: #000;
+        background: #fff; color: #000;
         box-shadow: 0 0 15px var(--accent);
-        transform: scale(1.1);
-        border-color: #fff;
+        transform: scale(1.05); border-color: #fff;
     }
 
+    /* STORY SECTION */
     .features-section {
-        padding: 150px 20px;
+        padding: 160px 20px;
         background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%); 
-        overflow: hidden;
-        position: relative;
-        z-index: 1;
+        position: relative; z-index: 1;
     }
-    .journey-container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 150px; }
+    .journey-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 180px; }
     
     .journey-step {
-        display: flex; align-items: center; justify-content: space-between; gap: 60px;
+        display: flex; align-items: center; justify-content: space-between; gap: 80px;
         opacity: 0; transform: translateY(50px); transition: all 1s ease;
     }
     .journey-step.visible { opacity: 1; transform: translateY(0); }
     .journey-step:nth-child(even) { flex-direction: row-reverse; }
 
-    .step-content { flex: 1; }
+    .step-content { flex: 1; text-align: left; }
     .step-visual { flex: 1; position: relative; display: flex; justify-content: center; }
 
-    .step-number { font-family: 'Space Grotesk'; font-size: 6rem; font-weight: 700; color: rgba(255,255,255,0.03); line-height: 1; position: absolute; top: -40px; left: -20px; z-index: -1; }
-    .step-title { font-size: 2rem; font-weight: 700; margin-bottom: 20px; background: linear-gradient(90deg, #fff, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-    .step-desc { font-size: 1.1rem; color: rgba(255,255,255,0.6); line-height: 1.8; }
+    .step-number { font-family: 'Space Grotesk'; font-size: 5rem; font-weight: 700; color: rgba(255,255,255,0.05); line-height: 1; margin-bottom: -20px; display: block; }
+    .step-title { font-size: 2.2rem; font-weight: 700; margin-bottom: 24px; color: #fff; letter-spacing: -0.5px; }
+    .step-desc { font-size: 1.1rem; color: rgba(255,255,255,0.6); line-height: 1.8; font-weight: 300; }
+    .step-desc b { color: #fff; font-weight: 600; }
     
     .visual-card {
-        width: 100%; max-width: 350px;
-        background: rgba(10, 10, 10, 0.6);
-        border: 1px solid var(--border); border-radius: 24px;
+        width: 100%; max-width: 320px; aspect-ratio: 1/1;
+        background: rgba(20, 20, 20, 0.4);
+        border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
         padding: 40px; text-align: center;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-        transition: transform 0.5s ease;
-        position: relative; overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
         backdrop-filter: blur(10px);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        transition: transform 0.5s ease;
     }
-    .visual-card:hover { transform: scale(1.02); border-color: var(--accent); background: rgba(20, 20, 20, 0.8); }
-    
-    .visual-icon { font-size: 60px; color: var(--accent); margin-bottom: 20px; display: block; filter: drop-shadow(0 0 15px var(--accent)); }
-    .visual-tag { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 2px; text-transform: uppercase; }
+    .visual-card:hover { transform: scale(1.02); background: rgba(30, 30, 30, 0.6); border-color: rgba(255,255,255,0.2); }
+    .visual-icon { font-size: 50px; margin-bottom: 25px; filter: drop-shadow(0 0 20px currentColor); }
+    .visual-tag { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; opacity: 0.8; }
 
+    /* CTA SECTION */
     .cta-sec { 
-        padding: 100px 20px; text-align: center; 
-        background: transparent; 
+        padding: 120px 20px 150px; text-align: center; 
         position: relative; z-index: 1;
     }
     
-    .cta-btn { display: inline-block; background: #fff; color: #000; padding: 20px 60px; font-size: 18px; font-weight: 700; border-radius: 50px; text-decoration: none; transition: 0.3s; box-shadow: 0 0 30px rgba(255,255,255,0.1); }
-    .cta-btn:hover { transform: scale(1.05); box-shadow: 0 0 50px rgba(255,255,255,0.4); }
+    .cta-btn { 
+        display: inline-block; 
+        background: #fff; color: #000; 
+        padding: 22px 60px; 
+        font-size: 18px; font-weight: 700; 
+        border-radius: 50px; 
+        text-decoration: none; 
+        transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
+        box-shadow: 0 0 40px rgba(255,255,255,0.15); 
+    }
+    .cta-btn:hover { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 60px rgba(255,255,255,0.4); 
+    }
 
+    /* RWD */
     @media (max-width: 900px) {
-        .demo-stage { flex-direction: column-reverse; }
-        .journey-step, .journey-step:nth-child(even) { flex-direction: column; text-align: center; gap: 40px; }
-        .step-number { left: 50%; transform: translateX(-50%); top: -50px; }
-        /* 手機版字體微調，避免斷行太難看 */
-        p.subhead { font-size: 1rem; width: 100%; padding: 0 10px; }
+        .hero { padding-top: 100px; }
+        .demo-stage { flex-direction: column-reverse; gap: 40px; }
+        .journey-step, .journey-step:nth-child(even) { flex-direction: column; gap: 40px; text-align: center; }
+        .step-content { text-align: center; }
+        .step-number { display: none; } /* 手機版隱藏大數字，保持簡潔 */
+        .step-title { font-size: 1.8rem; }
+        h1 { font-size: 3rem; }
     }
 
     @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-    @keyframes breath { 0%, 100% { opacity: 0.8; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.1); } }
+    @keyframes rotate { 100% { transform: rotate(360deg); } }
     @keyframes popUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
 <body>
 
+    <!-- 3D 背景邏輯 -->
     <script type="module">
         import * as THREE from 'three';
 
@@ -198,6 +289,7 @@
         const scene = new THREE.Scene();
         const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+        // 賈伯斯風格：極簡而深邃的 Fragment Shader
         const fragmentShader = `
             uniform float uTime;
             uniform vec2 uResolution;
@@ -212,34 +304,27 @@
                 return mix(mix(hash(n + 0.0), hash(n + 1.0), f.x),
                            mix(hash(n + 57.0), hash(n + 58.0), f.x), f.y);
             }
-            float fbm(vec2 p) {
-                float f = 0.0;
-                f += 0.50000 * noise(p); p *= 2.02;
-                f += 0.25000 * noise(p); p *= 2.03;
-                f += 0.12500 * noise(p); p *= 2.01;
-                return f;
-            }
             void main() {
                 vec2 uv = gl_FragCoord.xy / uResolution.xy;
-                vec3 topColor = vec3(0.0, 0.0, 0.02);
-                vec3 midColor = vec3(0.01, 0.03, 0.12);
-                vec3 botColor = vec3(0.05, 0.15, 0.30);
-                vec3 bg = mix(topColor, midColor, smoothstep(0.3, 0.8, 1.0 - uv.y));
-                bg = mix(bg, botColor, smoothstep(0.0, 0.6, 1.0 - uv.y));
-                vec2 rayUV = uv;
-                rayUV.y *= 0.3; 
-                rayUV.x += uTime * 0.015; 
-                rayUV.y -= uTime * 0.01; 
-                float rays = fbm(rayUV * 6.0);
-                float mask = smoothstep(0.0, 0.9, 1.0 - uv.y); 
-                vec3 rayColor = vec3(0.6, 0.8, 1.0) * rays * 0.12 * mask;
+                // 深邃黑底色
+                vec3 top = vec3(0.0, 0.0, 0.05);
+                vec3 bot = vec3(0.02, 0.05, 0.15);
+                vec3 color = mix(top, bot, uv.y);
+                
+                // 極光流動
+                float t = uTime * 0.2;
+                float aurora = noise(vec2(uv.x * 3.0 + t, uv.y * 2.0 - t));
+                aurora += noise(vec2(uv.x * 6.0 - t, uv.y * 4.0 + t)) * 0.5;
+                
+                // 互動光暈 (滑鼠位置)
                 vec2 mouse = uMouse / uResolution.xy;
                 float dist = distance(uv, mouse);
-                float glow = smoothstep(0.35, 0.0, dist) * 0.15;
-                vec3 mouseGlow = vec3(0.2, 0.6, 1.0) * glow;
-                vec3 finalColor = bg + rayColor + mouseGlow;
-                finalColor += (hash(uv.x * uv.y * uTime) - 0.5) * 0.03;
-                gl_FragColor = vec4(finalColor, 1.0);
+                float glow = smoothstep(0.4, 0.0, dist) * 0.2;
+                
+                color += vec3(0.4, 0.6, 1.0) * aurora * 0.1; 
+                color += vec3(0.2, 0.5, 0.9) * glow;
+
+                gl_FragColor = vec4(color, 1.0);
             }
         `;
 
@@ -259,14 +344,12 @@
         scene.add(plane);
 
         let mouseX = 0, mouseY = 0;
-
-        window.addEventListener('resize', onWindowResize, false);
-        function onWindowResize() {
+        window.addEventListener('resize', () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             uniforms.uResolution.value.x = window.innerWidth;
             uniforms.uResolution.value.y = window.innerHeight;
-        }
-        onWindowResize();
+        });
+        window.dispatchEvent(new Event('resize'));
 
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
@@ -275,70 +358,55 @@
 
         const clock = new THREE.Clock();
         function animate() {
-            const time = clock.getElapsedTime();
-            uniforms.uTime.value = time;
-            
-            const currentX = uniforms.uMouse.value.x;
-            const currentY = uniforms.uMouse.value.y;
-            uniforms.uMouse.value.x += (mouseX - currentX) * 0.05;
-            uniforms.uMouse.value.y += ((window.innerHeight - mouseY) - currentY) * 0.05;
-
+            uniforms.uTime.value = clock.getElapsedTime();
+            // 平滑滑鼠跟隨
+            uniforms.uMouse.value.x += (mouseX - uniforms.uMouse.value.x) * 0.05;
+            uniforms.uMouse.value.y += ((window.innerHeight - mouseY) - uniforms.uMouse.value.y) * 0.05;
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
         animate();
     </script>
 
-    <!-- HERO -->
-    <section class="hero">
-        <div style="position: absolute; top: 20px; right: 20px; z-index: 10;">
-            <a href="auth.html" style="
-                color: rgba(255,255,255,0.7); 
-                text-decoration: none; 
-                font-size: 14px; 
-                border: 1px solid rgba(255,255,255,0.2); 
-                padding: 8px 20px; 
-                border-radius: 30px; 
-                backdrop-filter: blur(5px);
-                transition: 0.3s;
-                font-family: 'Space Grotesk', sans-serif;
-            " onmouseover="this.style.color='#fff'; this.style.borderColor='#fff'" 
-            onmouseout="this.style.color='rgba(255,255,255,0.7)'; this.style.borderColor='rgba(255,255,255,0.2)'">
-            <i class="fas fa-user-astronaut"></i> 登入 / 註冊
-            </a>
-        </div>
+    <!-- 頂部按鈕 -->
+    <div class="nav-top">
+        <a href="auth.html" class="nav-btn">
+            <i class="fas fa-fingerprint"></i> 喚醒我的 YOYI
+        </a>
+    </div>
 
-        <div class="pill"><i class="fas fa-circle"></i> 系統運作正常 | YOYI 2.0 DIGITAL TWIN</div>
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="pill"><i class="fas fa-circle"></i> Always On. Always You.</div>
         
-        <!-- 已修正：移除句點 -->
-        <h1>複製一個<br>最完美的你</h1>
+        <h1>讓世界，隨時<br>都能遇見最好的你</h1>
         
-        <!-- 已修正：加寬寬度，確保不斷行 -->
         <p class="subhead">
-            無論您是創業者、網紅、或是自由工作者。<br>
-            讓 <b>祐逸 YOYI</b> 成為您的「智能分身」，24 小時優雅地回應每一個機會。
+            你不必時刻在線，但你的熱情可以。<br>
+            <b>YOYI</b> 是你的數位延伸，替你回答、替你接待、並替你記住每一個重要的瞬間。
         </p>
 
         <div class="demo-stage">
             <div class="demo-controls">
-                <div style="text-transform: uppercase; font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 2px; margin-bottom: 20px;">Choose Your Persona (定義你的身分)</div>
+                <div style="text-transform: uppercase; font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 20px;">Choose Your Identity (選擇你的分身)</div>
                 <div class="industry-grid">
-                    <div class="ind-btn active" onclick="switchTheme('personal')" id="btn-personal" style="--active-color: #00f260; --active-glow: rgba(0, 242, 96, 0.4)">
-                        <i class="fas fa-user-tie ind-icon"></i> <div>個人/接案</div>
+                    <div class="ind-btn active" onclick="switchTheme('personal')" id="btn-personal" style="--active-color: #00f260;">
+                        <i class="fas fa-user ind-icon"></i> <div>我是 個人/自由業者</div>
                     </div>
-                    <div class="ind-btn" onclick="switchTheme('influencer')" id="btn-influencer" style="--active-color: #da77f2; --active-glow: rgba(218, 119, 242, 0.4)">
-                        <i class="fas fa-hashtag ind-icon"></i> <div>網紅/KOL</div>
+                    <div class="ind-btn" onclick="switchTheme('influencer')" id="btn-influencer" style="--active-color: #da77f2;">
+                        <i class="fas fa-star ind-icon"></i> <div>我是 網紅/創作者</div>
                     </div>
-                    <div class="ind-btn" onclick="switchTheme('business')" id="btn-business" style="--active-color: #ff9068; --active-glow: rgba(255, 144, 104, 0.4)">
-                        <i class="fas fa-building ind-icon"></i> <div>品牌商家</div>
+                    <div class="ind-btn" onclick="switchTheme('business')" id="btn-business" style="--active-color: #ff9068;">
+                        <i class="fas fa-store ind-icon"></i> <div>我是 品牌/店家</div>
                     </div>
-                    <div class="ind-btn" onclick="switchTheme('tech')" id="btn-tech" style="--active-color: #4CA1AF; --active-glow: rgba(76, 161, 175, 0.4)">
-                        <i class="fas fa-code ind-icon"></i> <div>科技/新創</div>
+                    <div class="ind-btn" onclick="switchTheme('tech')" id="btn-tech" style="--active-color: #4CA1AF;">
+                        <i class="fas fa-code ind-icon"></i> <div>我是 數位遊牧者</div>
                     </div>
                 </div>
                 
-                <div style="margin-top:30px; padding:20px; border-left:2px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.6); font-size:13px;">
-                    <i class="fas fa-fingerprint"></i> <b>數據洞察系統：</b> 您可以看見每個問題的「點擊熱度」，也能看到訪客偷偷輸入了什麼關鍵字。這不只是回答，這是讀心術。
+                <div style="margin-top:30px; padding:20px; border-left:2px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); font-size:14px; line-height: 1.6;">
+                    <i class="fas fa-quote-left" style="color:var(--text-sub); margin-right:8px;"></i>
+                    <span id="demo-quote">這不只是自動回覆，這是你的第二張名片。當你休息時，它依然優雅地代表你接待每一位訪客。</span>
                 </div>
             </div>
 
@@ -354,9 +422,12 @@
                         </div>
                     </div>
                     <div class="sim-chat" id="simChat">
-                        <div class="msg bot">嗨！我是 Alex 的 AI 分身。目前 Alex 正在趕稿中，有什麼我可以先幫您的嗎？</div>
+                        <div class="msg bot">嗨！我是 Alex。我現在可能在專心設計中，有什麼我可以先幫你解答的嗎？</div>
                     </div>
                     <div class="sim-footer">
+                        <div class="sim-input-fake">
+                            <i class="fas fa-keyboard"></i> 問我任何事，或教我怎麼回答...
+                        </div>
                         <div class="sim-chips" id="simChips"></div>
                     </div>
                 </div>
@@ -364,26 +435,26 @@
         </div>
     </section>
 
-    <!-- FEATURES - STREAM LAYOUT -->
+    <!-- FEATURES - STORYTELLING -->
     <section class="features-section">
         <div class="journey-container">
             <!-- Step 1 -->
             <div class="journey-step">
                 <div class="step-content">
-                    <div class="step-number">01</div>
-                    <h2 class="step-title">3 天，見證奇蹟</h2>
+                    <span class="step-number">01</span>
+                    <h2 class="step-title">你的數位名片，活了過來</h2>
                     <p class="step-desc">
-                        不需要信用卡，不需要繁瑣合約。<br>
-                        透過 Google / LINE 一鍵登入，立即獲得 3 天全功能試用。<br>
-                        <!-- 已修正：使用通俗用語 -->
-                        您將擁有個人的 <b>專屬網址</b>，立刻傳給客戶，讓他們體驗您的「秒回」魅力。
+                        靜態的連結已經過時了。打造一個能說話、能互動的頁面。<br><br>
+                        不管是粉絲想問「你單身嗎？」，還是客戶想問「報價多少？」，<br>
+                        <b>YOYI 都能優雅地替你回答。</b><br>
+                        把它放在 IG、Line 或 Threads 的介紹裡，這是你最專業的接待員。
                     </p>
                 </div>
                 <div class="step-visual">
                     <div class="visual-card">
-                        <i class="fas fa-id-card visual-icon"></i>
-                        <div class="visual-tag">EXCLUSIVE LINK</div>
-                        <div style="margin-top:15px; font-size:12px; color:#888;">專屬連結 | 永久保留</div>
+                        <i class="fas fa-id-badge visual-icon" style="color: #fff;"></i>
+                        <div class="visual-tag">Interactive Identity</div>
+                        <div style="margin-top:15px; font-size:12px; color:#888;">專屬網址 | 你的個人入口</div>
                     </div>
                 </div>
             </div>
@@ -391,19 +462,21 @@
             <!-- Step 2 -->
             <div class="journey-step">
                 <div class="step-content">
-                    <div class="step-number">02</div>
-                    <h2 class="step-title">洞察人心，數據為王</h2>
+                    <span class="step-number">02</span>
+                    <h2 class="step-title">聽見沈默的聲音</h2>
                     <p class="step-desc">
-                        想知道粉絲最關心什麼？是「業配報價」還是「感情狀況」？<br>
-                        YOYI 後台完整記錄每一次點擊與查詢。<br>
-                        <b>這是您的私人雷達</b>，幫您找出下一個爆紅的話題或商機。
+                        有些人害羞不敢私訊，但他們會在搜尋框打字。<br>
+                        YOYI 會捕捉這些<b>「未說出口的需求」</b>。<br><br>
+                        如果有人問了你沒設定的問題，YOYI 會告訴對方：<br>
+                        <i>「這個問題很棒，我已經記下來通知本尊了。」</i><br>
+                        你會在後台看到這些真實的心聲，這就是你成長的養分。
                     </p>
                 </div>
                 <div class="step-visual">
-                    <div class="visual-card" style="border-color: #da77f2;">
-                        <i class="fas fa-brain visual-icon" style="color: #da77f2;"></i>
-                        <div class="visual-tag" style="color: #da77f2;">DATA INSIGHT</div>
-                        <div style="margin-top:15px; font-size:12px; color:#888;">點擊熱點 | 搜尋意圖分析</div>
+                    <div class="visual-card" style="border-color: rgba(255,255,255,0.3);">
+                        <i class="fas fa-heart-pulse visual-icon" style="color: #da77f2;"></i>
+                        <div class="visual-tag" style="color: #da77f2;">Empathy Engine</div>
+                        <div style="margin-top:15px; font-size:12px; color:#888;">讀取意圖 | 記錄未知</div>
                     </div>
                 </div>
             </div>
@@ -411,21 +484,20 @@
             <!-- Step 3 -->
             <div class="journey-step">
                 <div class="step-content">
-                    <div class="step-number">03</div>
-                    <h2 class="step-title">喜歡？那就留下它</h2>
+                    <span class="step-number">03</span>
+                    <h2 class="step-title">簡單，卻不簡單</h2>
                     <p class="step-desc">
-                        試用期滿意嗎？<br>
-                        <!-- 已修正：去除技術名詞 -->
-                        我們支援 <b>主流線上支付 (信用卡/LINE Pay)</b>，提供 30 天或 365 天方案。<br>
-                        付款瞬間，您的分身自動續命，所有設定與數據完美保留。<br>
-                        這不僅是軟體，這是您對未來的投資。
+                        沒有複雜的設定，沒有難懂的術語。<br>
+                        就像 iPhone 一樣，開箱即用。<br><br>
+                        支援 <b>LINE Pay</b> 與信用卡，一杯咖啡的錢，讓你的分身永不下線。<br>
+                        這是你對未來的投資，也是對每一位訪客的尊重。
                     </p>
                 </div>
                 <div class="step-visual">
-                    <div class="visual-card" style="border-color: #ff9068;">
-                        <i class="fas fa-gem visual-icon" style="color: #ff9068;"></i>
-                        <div class="visual-tag" style="color: #ff9068;">PREMIUM SERVICE</div>
-                        <div style="margin-top:15px; font-size:12px; color:#888;">無縫續約 | 服務不中斷</div>
+                    <div class="visual-card" style="border-color: rgba(255,255,255,0.3);">
+                        <i class="fas fa-infinity visual-icon" style="color: #ff9068;"></i>
+                        <div class="visual-tag" style="color: #ff9068;">Always On</div>
+                        <div style="margin-top:15px; font-size:12px; color:#888;">自動續約 | 隨時取消</div>
                     </div>
                 </div>
             </div>
@@ -435,46 +507,51 @@
 
     <!-- CTA SECTION -->
     <section class="cta-sec">
-        <h2 style="font-size: 3rem; margin-bottom: 30px;">準備好擁有分身了嗎？</h2>
+        <h2 style="font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: 30px; font-family: 'Space Grotesk';">準備好遇見另一個自己了嗎？</h2>
         <a href="auth.html" class="cta-btn">
-            <i class="fas fa-rocket" style="margin-right: 10px;"></i> 申請 3 天免費試用
+            <i class="fas fa-power-off" style="margin-right: 12px;"></i> 立即啟動 YOYI
         </a>
+        <p style="margin-top: 30px; color: rgba(255,255,255,0.4); font-size: 14px;">
+            免費試用 3 天 · 無需預綁信用卡 · 隨時可取消
+        </p>
     </section>
 
     <script>
+        // 滾動動畫偵測
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.3 });
+        }, { threshold: 0.2 });
         document.querySelectorAll('.journey-step').forEach(step => observer.observe(step));
 
+        // 演示主題數據 (Humanized Copy)
         const themes = {
             personal: { 
                 name: "ALEX // DESIGNER", 
                 vars: { c1: "#00f260", c2: "#0575e6", c3: "#00f260", accent: "#00f260" }, 
-                welcome: "嗨！我是 Alex 的 AI 分身。目前 Alex 正在趕稿中，有什麼我可以先幫您的嗎？", 
-                chips: [{q:"接案報價", a:"網頁設計 $30,000 起，Logo 設計 $8,000 起。詳細請參考作品集。"}, {q:"目前檔期", a:"目前案量較滿，最快可開工時間為下個月 15 號。"}, {q:"聯絡方式", a:"急事請點擊上方 LINE 按鈕，一般詢問請 email 至 alex@design.io"}] 
+                welcome: "嗨！我是 Alex。我現在可能在專心設計中，有什麼我可以先幫你解答的嗎？", 
+                chips: [{q:"接案報價", a:"每個專案都是獨一無二的。一般網頁設計約 $30,000 起，我們可以先聊聊你的需求。"}, {q:"目前檔期", a:"感謝厚愛！目前手邊案子較多，最快能幫您安排在下個月中旬。"}, {q:"可以打給你嗎", a:"我工作時習慣專注，建議先點擊上方 LINE 留言，我看到會盡快回覆您！"}] 
             },
             influencer: { 
-                name: "NINA // LIFESTYLE", 
+                name: "NINA // DAILY", 
                 vars: { c1: "#833ab4", c2: "#fd1d1d", c3: "#fcb045", accent: "#da77f2" }, 
-                welcome: "Hello~ 我是 Nina 的小幫手 ❤️ 廠商邀約或粉絲問候請看下面～", 
-                chips: [{q:"商業合作", a:"請將產品資訊與預算寄到 nina.work@gmail.com，經紀人會盡快回覆。"}, {q:"使用的相機", a:"照片大多使用 Sony A7C + 35mm F1.8 拍攝，偶爾用 iPhone 15 Pro。"}, {q:"粉絲團購", a:"最新的團購資訊都會放在 IG 限動精選，記得去查看喔！"}] 
+                welcome: "Hello~ 這裡是 Nina 的小天地 ❤️ 謝謝你來看我，想知道什麼秘密嗎？", 
+                chips: [{q:"商業合作", a:"謝謝廠商爸爸！請將產品資訊寄到 nina.work@gmail.com，經紀人會優先處理喔。"}, {q:"照片用什麼拍", a:"我很愛用 Sony A7C 配 35mm 定焦鏡，那種空氣感真的很美！"}, {q:"最近團購", a:"最新的好物都放在 IG 精選動態「本週好物」裡面囉，快去搶！"}] 
             },
             business: { 
-                name: "COFFEE LAB // CAFE", 
+                name: "COFFEE LAB.", 
                 vars: { c1: "#ff416c", c2: "#ff4b1f", c3: "#ff9068", accent: "#ff9068" }, 
-                welcome: "歡迎來到 Coffee Lab！今天想喝點什麼？", 
-                chips: [{q:"有插座嗎", a:"有的，我們全店座位皆配有插座，且提供免費高速 Wi-Fi。"}, {q:"營業時間", a:"每日 10:00 - 22:00，無公休日。"}, {q:"訂位方式", a:"目前僅接受 4 人以上訂位，請點擊上方電話按鈕直接來電。"}] 
+                welcome: "歡迎光臨 Coffee Lab。今天想喝點什麼？或是想找個位子？", 
+                chips: [{q:"有插座嗎", a:"有的，我們知道你需要電量。全店座位都有插座，還有高速 Wi-Fi 等你。"}, {q:"營業時間", a:"我們每天早上 10 點開門，陪你到晚上 10 點。無公休日。"}, {q:"如何訂位", a:"為了維持空間品質，我們僅接受 4 人以上訂位，請直接點擊電話按鈕聯繫店長。"}] 
             },
             tech: { 
-                name: "NEXUS // STARTUP", 
+                name: "NOMAD // DEV", 
                 vars: { c1: "#2C3E50", c2: "#4CA1AF", c3: "#C4E0E5", accent: "#4CA1AF" }, 
-                welcome: "您好，這裡是 Nexus 科技客服中心。請選擇您遇到的問題。", 
-                chips: [{q:"忘記密碼", a:"請至登入頁面點擊「忘記密碼」，系統將發送重設信件至您的信箱。"}, {q:"API 文件", a:"完整的開發者文件已更新至官網 /docs 頁面。"}, {q:"企業方案", a:"企業版支援私有化部署與 SSO 登入，請聯繫業務團隊索取報價。"}] 
+                welcome: "Hey，我是 Ray。目前人不在台灣，正在體驗數位遊牧生活。", 
+                chips: [{q:"你在哪裡", a:"目前正在清邁的一個共享空間，這裡的咖啡很棒，網路也很快。"}, {q:"合作諮詢", a:"我們可以約個 Google Meet。請直接寄信到 ray.dev@gmail.com。"}, {q:"使用的裝備", a:"MacBook Pro M3 + Keychron K2，這是我的移動辦公室標配。"}] 
             }
         };
 
@@ -486,6 +563,7 @@
             isUserInteracting = true;
             clearTimeout(autoPlayTimer);
 
+            // 按鈕狀態切換
             document.querySelectorAll('.ind-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById('btn-' + key).classList.add('active');
             
@@ -493,15 +571,22 @@
             currentTheme = key;
             const screen = document.getElementById('simScreen');
             
+            // CSS 變數切換
             screen.style.setProperty('--s-c1', t.vars.c1);
             screen.style.setProperty('--s-c2', t.vars.c2);
             screen.style.setProperty('--s-c3', t.vars.c3);
             screen.style.setProperty('--s-accent', t.vars.accent);
             
+            // 內容切換
             document.getElementById('simBrand').innerText = t.name;
             const chat = document.getElementById('simChat');
             
-            chat.innerHTML = `<div class="msg bot">${t.welcome}</div>`;
+            // 清空並重新打字效果
+            chat.innerHTML = '';
+            setTimeout(() => {
+                chat.innerHTML = `<div class="msg bot" style="animation: popUp 0.5s ease">${t.welcome}</div>`;
+            }, 100);
+
             renderChips(t.chips);
         }
 
@@ -533,15 +618,17 @@
             chat.appendChild(uMsg);
             chat.scrollTop = chat.scrollHeight;
 
+            // 模擬思考延遲，更有「人味」
             setTimeout(() => {
                 const bMsg = document.createElement('div'); 
                 bMsg.className = 'msg bot'; 
                 bMsg.innerText = a; 
                 chat.appendChild(bMsg);
                 chat.scrollTop = chat.scrollHeight;
-            }, 600);
+            }, 800);
         }
 
+        // 自動演示邏輯
         function startAutoDemo() {
             if (isUserInteracting) return;
             autoPlayTimer = setTimeout(() => {
@@ -556,20 +643,18 @@
                         simReply(t.chips[0].q, t.chips[0].a);
                     }, 800);
                 }
-            }, 1500);
+            }, 2000);
         }
 
         window.onload = () => {
             switchTheme('personal');
-            isUserInteracting = false; 
+            isUserInteracting = false; // 重置互動狀態以允許第一次自動播放
             startAutoDemo();
         };
 
-        document.querySelectorAll('.ind-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                isUserInteracting = true;
-                clearTimeout(autoPlayTimer);
-            });
+        // 監聽任何點擊以停止自動播放
+        document.querySelectorAll('.ind-btn, .sim-chip').forEach(el => {
+            el.addEventListener('click', () => isUserInteracting = true);
         });
     </script>
 </body>
