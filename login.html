@@ -348,30 +348,60 @@ function applyTheme(profile) {
 // 修正後的社群圖標渲染 (支援 LINE ID 判斷)
 function renderSocials(profile) {
     const deck = document.getElementById('socialDeck'); deck.innerHTML = '';
+    
+    // 1. 定義連結與類型 (這裡增加了 type 標籤，讓下面能分辨是哪個平台)
     const links = [
         { icon: 'fas fa-phone', val: profile.link_phone, type: 'tel' },
         { icon: 'fas fa-envelope', val: profile.link_mail, type: 'mailto' },
-        { icon: 'fab fa-line', val: profile.link_line, type: 'line' },
-        { icon: 'fab fa-instagram', val: profile.link_ig },
-        { icon: 'fab fa-facebook-f', val: profile.link_fb },
-        { icon: 'fas fa-at', val: profile.link_threads }
+        { icon: 'fab fa-line', val: profile.link_line, type: 'line' },      // LINE 專用
+        { icon: 'fab fa-instagram', val: profile.link_ig, type: 'ig' },      // IG 專用
+        { icon: 'fab fa-facebook-f', val: profile.link_fb, type: 'fb' },     // FB 專用
+        { icon: 'fas fa-at', val: profile.link_threads, type: 'threads' }    // Threads 專用
     ];
+
     links.forEach(link => {
         if (link.val) {
             const a = document.createElement('a'); a.className = 'nav-btn';
-            let href = link.val;
+            let href = link.val.trim(); // 去除前後空白，防止錯誤
             
-            if (link.type === 'tel') href = `tel:${link.val}`;
-            else if (link.type === 'mailto') href = `mailto:${link.val}`;
+            // === 2. 依照類型進行智慧轉換 ===
+
+            if (link.type === 'tel') {
+                href = `tel:${href}`;
+            } 
+            else if (link.type === 'mailto') {
+                href = `mailto:${href}`;
+            } 
+            // ▼▼▼ 這是您原本熟悉的 LINE 完美邏輯 (保留不變) ▼▼▼
             else if (link.type === 'line') {
-                // LINE 智能判斷
-                if (href.startsWith('http')) { /* do nothing */ }
+                if (href.startsWith('http')) { /* 如果已經是網址，什麼都不做 */ }
                 else if (href.startsWith('@')) href = `https://line.me/R/ti/p/${href}`; // 官方帳號
                 else href = `https://line.me/ti/p/~${href}`; // 個人 ID
             }
-            else if (!href.startsWith('http')) href = `https://${href}`;
+            // ▲▲▲ LINE 邏輯結束 ▲▲▲
 
-            a.href = href; a.target = '_blank';
+            // ▼▼▼ 新增：IG/FB/Threads 自動補全邏輯 (解決點不開的問題) ▼▼▼
+            else if (link.type === 'ig') {
+                // 如果沒輸入 https，自動補上 instagram.com
+                if (!href.startsWith('http')) href = `https://www.instagram.com/${href.replace('@', '')}`;
+            }
+            else if (link.type === 'fb') {
+                // 如果沒輸入 https，自動補上 facebook.com
+                if (!href.startsWith('http')) href = `https://www.facebook.com/${href}`;
+            }
+            else if (link.type === 'threads') {
+                // 如果沒輸入 https，自動補上 threads.net
+                if (!href.startsWith('http')) href = `https://www.threads.net/@${href.replace('@', '')}`;
+            }
+            // ▲▲▲ 新增邏輯結束 ▲▲▲
+
+            // 最後防呆：如果都不是以上類型，但又沒有 http，就補上 https://
+            else {
+                if (!href.startsWith('http')) href = `https://${href}`;
+            }
+
+            a.href = href; 
+            a.target = '_blank';
             a.innerHTML = `<i class="${link.icon}"></i>`;
             deck.appendChild(a);
         }
