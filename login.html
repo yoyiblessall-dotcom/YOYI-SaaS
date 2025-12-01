@@ -492,78 +492,42 @@ async function logToCloud(msg, response, type) {
 function handleInput(q, a, id) {
   addNode("user", q);
   showProcessing();
-  if (id && CLIENT_ID) supabaseClient.rpc('increment_click_count', { row_id: id });
-  logToCloud(q, a, 'button');
+  
+  // 1. 這裡只做加分
+  if (id && CLIENT_ID) {
+      console.log("正在嘗試加分 ID:", id); // 除錯用
+      supabaseClient.rpc('increment_click_count', { row_id: id }).then(res => {
+          if(res.error) console.error("加分失敗:", res.error);
+          else console.log("加分成功!");
+      });
+  }
+  
+  // 2. 這裡只觸發 UI 顯示，logToCloud 會在內部判斷 type='button' 而不寫入
+  logToCloud(q, a, 'button'); 
+  
   setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
 }
 
 function handleSend() {
-  const input = document.getElementById("userInput"); 
-  const text = input.value.trim();
-  if(!text) return;
-
-  // 1. 顯示使用者訊息
-  addNode("user", text); 
-  input.value = ""; 
-  showProcessing();
+  const input = document.getElementById("userInput"); const text = input.value.trim(); if(!text) return;
+  addNode("user", text); input.value = ""; showProcessing();
+  let ans = null; let isFallback = false;
+  if (currentQnA.length > 0) { for(let f of currentQnA) { if (f.question && text.includes(f.question)) { ans = f.answer; break; } } }
+  if (!ans) { const randomIndex = Math.floor(Math.random() * fallbackMessages.length); ans = fallbackMessages[randomIndex]; isFallback = true; }
   
-  let ans = null;
-  let isFallback = false; // 標記是否為隨機回覆
-  
-  // 2. 搜尋資料庫
-  if (currentQnA.length > 0) {
-    for(let f of currentQnA) {
-        if (f.question && text.includes(f.question)) { 
-            ans = f.answer; 
-            break; 
-        }
-    }
-  }
-  
-  // 3. 如果沒答案，使用 OS 風格回覆
-  if (!ans) {
-      const randomIndex = Math.floor(Math.random() * fallbackMessages.length);
-      ans = fallbackMessages[randomIndex];
-      isFallback = true; // 標記這是系統提示
-  }
-  
+  // 這裡 type 是 'text'，所以會寫入 Log
   logToCloud(text, ans, 'text');
 
-  // 4. 延遲顯示 (如果是系統提示，用特殊樣式)
-  setTimeout(() => { 
-      removeProcessing(); 
-      if (isFallback) {
-          addNode("sys-msg", ans); // 用新的 class
-      } else {
-          addNode("bot", ans); // 正常的回答
-      }
-  }, 600); 
+  setTimeout(() => { removeProcessing(); if (isFallback) { addNode("sys-msg", ans); } else { addNode("bot", ans); } }, 600); 
 }
 
-// 修正後的 addNode (支援 sys-msg)
 function addNode(role, text) {
-  const body = document.getElementById("chatBody");
-  const node = document.createElement("div"); 
-  
-  // 如果是 sys-msg，它其實也是 bot 的一種變體，但我們給它特殊的 class
-  if (role === 'sys-msg') {
-      node.className = `node bot sys-msg`;
-  } else {
-      node.className = `node ${role}`;
-  }
-  
+  const body = document.getElementById("chatBody"); const node = document.createElement("div"); 
+  if (role === 'sys-msg') { node.className = `node bot sys-msg`; } else { node.className = `node ${role}`; }
   node.innerHTML = `<div class="node-text">${text.replace(/\n/g, '<br>')}</div>`;
-  body.appendChild(node); 
-  body.scrollTop = body.scrollHeight;
-}
-
-function showProcessing() {
-  const body = document.getElementById("chatBody");
-  const node = document.createElement("div"); node.id = "procNode"; node.className = "node bot";
-  node.innerHTML = `<div class="node-text" style="opacity:0.6; font-size:12px; letter-spacing:1px;">COMPUTING...</div>`;
   body.appendChild(node); body.scrollTop = body.scrollHeight;
 }
-
+function showProcessing() { const body = document.getElementById("chatBody"); const node = document.createElement("div"); node.id = "procNode"; node.className = "node bot"; node.innerHTML = `<div class="node-text" style="opacity:0.6; font-size:12px; letter-spacing:1px;">COMPUTING...</div>`; body.appendChild(node); body.scrollTop = body.scrollHeight; }
 function removeProcessing() { const el = document.getElementById("procNode"); if(el) el.remove(); }
 document.getElementById("userInput").addEventListener("keypress", (e) => { if(e.key==="Enter") handleSend(); });
 
