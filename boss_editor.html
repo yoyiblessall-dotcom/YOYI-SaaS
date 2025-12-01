@@ -17,16 +17,96 @@
   @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   
   .layout { display: flex; width: 100%; height: 100%; position: relative; z-index: 1; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
-  .deck { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); backdrop-filter: blur(20px); max-width: 60%; background: rgba(0,0,0,0.4); }
-  .deck-header { padding: 30px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  
+  /* DECK 優化：增加 relative 以定位 Dock */
+  .deck { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); backdrop-filter: blur(20px); max-width: 60%; background: rgba(0,0,0,0.4); position: relative; }
+  .deck-header { padding: 30px 40px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
   .brand { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
   .status { font-size: 12px; color: var(--text-mute); letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
   .dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88; }
-  .deck-scroll { flex: 1; overflow-y: auto; padding: 40px; padding-bottom: 100px; }
-  .deck-scroll::-webkit-scrollbar { width: 6px; }
-  .deck-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
   
-  .section-title { font-size: 12px; color: var(--text-mute); letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; border-left: 2px solid var(--accent); padding-left: 10px; font-weight: 700; margin-top: 40px; }
+  /* 核心修改：Deck Scroll 不再全域滾動，而是作為 Panel 的容器 */
+  .deck-scroll { flex: 1; position: relative; overflow: hidden; padding: 0; }
+  
+  /* 新增：View Panel (分頁層) */
+  .view-panel { 
+    display: none; 
+    height: 100%; 
+    overflow-y: auto; 
+    padding: 40px; 
+    padding-bottom: 120px; /* 留給 Dock 的空間 */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .view-panel.active-panel { 
+    display: block; 
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .view-panel::-webkit-scrollbar { width: 4px; }
+  .view-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+  /* 新增：Bottom Navigation Dock */
+  .nav-dock {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 10, 10, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 24px;
+    padding: 8px 12px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    z-index: 100;
+  }
+  .dock-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    position: relative;
+  }
+  .dock-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+  .dock-btn.active { 
+    color: #000; 
+    background: var(--accent); 
+    box-shadow: 0 0 20px var(--glow);
+    transform: translateY(-4px) scale(1.05);
+  }
+  .dock-btn::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.8);
+    background: #000;
+    color: #fff;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .dock-btn:hover::after { opacity: 1; transform: translateX(-50%) scale(1); }
+  
+  .section-title { font-size: 12px; color: var(--text-mute); letter-spacing: 2px; margin-bottom: 20px; text-transform: uppercase; border-left: 2px solid var(--accent); padding-left: 10px; font-weight: 700; margin-top: 20px; }
   .section-title:first-child { margin-top: 0; }
   
   .input-group { margin-bottom: 30px; position: relative; }
@@ -102,56 +182,92 @@
 <div class="layout">
   <div class="deck">
     <div class="deck-header"><div class="brand">STANDALONE CORE</div><div class="status"><div class="dot"></div> ONLINE <span id="clientIdDisplay" style="margin-left:10px; opacity:0.5;"></span></div></div>
+    
     <div class="deck-scroll">
       
-      <div class="section-title">00 / MY DIGITAL TWIN (我的分身連結)</div>
-      <div class="share-box">
-          <input type="text" class="share-url" id="shareUrlInput" readonly value="Loading URL...">
-          <button class="copy-btn" onclick="copyLink()">COPY LINK</button>
+      <!-- ============================================== -->
+      <!-- VIEW 1: DASHBOARD (儀表板) -->
+      <!-- ============================================== -->
+      <div id="panel-dashboard" class="view-panel active-panel">
+        <div class="section-title">00 / DASHBOARD (概況)</div>
+        
+        <div class="label" style="margin-bottom:10px;">MY DIGITAL TWIN LINK</div>
+        <div class="share-box">
+            <input type="text" class="share-url" id="shareUrlInput" readonly value="Loading URL...">
+            <button class="copy-btn" onclick="copyLink()">COPY</button>
+        </div>
+
+        <div class="section-title">04 / DATA INSIGHTS (數據洞察)</div>
+        <div class="insight-card">
+            <div style="font-size:11px; font-weight:700; margin-bottom:15px; color:var(--accent);">TOP QUESTIONS (點擊熱度排行)</div>
+            <div id="statsContainer" style="min-height:50px;">LOADING...</div>
+        </div>
+        <div class="insight-card">
+            <div style="font-size:11px; font-weight:700; margin-bottom:15px; color:var(--accent);">RECENT LOGS (最近對話紀錄)</div>
+            <div id="logsContainer" style="min-height:50px;">LOADING...</div>
+        </div>
       </div>
 
-      <div class="section-title">01 / SYSTEM PROTOCOL (基本設定)</div>
-      <div class="input-group"><label class="label">DISPLAY NAME (顯示名稱)</label><input type="text" class="god-input" id="shopNameInput" oninput="syncPreview()"></div>
-      <div class="input-group"><label class="label">WELCOME MESSAGE (歡迎語)</label><input type="text" class="god-input" id="welcomeInput" oninput="syncPreview()"></div>
-
-      <div class="section-title">01.5 / CONTACT NODES (聯絡節點)</div>
-      <div class="grid-2">
-        <div class="input-group"><label class="label">PHONE LINK</label><input type="text" class="god-input" id="phoneInput" oninput="syncPreview()"></div>
-        <div class="input-group"><label class="label">EMAIL LINK</label><input type="text" class="god-input" id="mailInput" oninput="syncPreview()"></div>
-      </div>
-      <div class="grid-2">
-        <div class="input-group"><label class="label">LINE ID</label><input type="text" class="god-input" id="lineInput" oninput="syncPreview()"></div>
-        <div class="input-group"><label class="label">INSTAGRAM</label><input type="text" class="god-input" id="igInput" oninput="syncPreview()"></div>
-      </div>
-      <div class="grid-2">
-        <div class="input-group"><label class="label">FACEBOOK</label><input type="text" class="god-input" id="fbInput" oninput="syncPreview()"></div>
-        <div class="input-group"><label class="label">THREADS</label><input type="text" class="god-input" id="threadsInput" oninput="syncPreview()"></div>
+      <!-- ============================================== -->
+      <!-- VIEW 2: NEURAL (神經中樞 - 對話) -->
+      <!-- ============================================== -->
+      <div id="panel-neural" class="view-panel">
+        <div class="section-title">03 / NEURAL RESPONSES (對話邏輯)</div>
+        <div style="font-size:12px; color:#aaa; margin-bottom:20px; line-height:1.6;">
+            訓練你的數位分身如何思考與回應。<br>每一個節點都是一個觸發機制。
+        </div>
+        <div id="qaList"></div>
+        <div class="action-deck"><button class="btn-ghost" onclick="addQA()">+ ADD NODE</button></div>
       </div>
 
-      <div class="section-title">02 / VISUAL CORE (視覺氛圍)</div>
-      <div class="input-group"><label class="label">ATMOSPHERE SELECTION</label><div class="color-grid" id="themeGrid"></div></div>
-      
-      <div class="section-title">03 / NEURAL RESPONSES (對話邏輯)</div>
-      <div id="qaList"></div>
-      <div class="action-deck"><button class="btn-ghost" onclick="addQA()">+ ADD NODE</button></div>
+      <!-- ============================================== -->
+      <!-- VIEW 3: APPEARANCE (外觀與人設) -->
+      <!-- ============================================== -->
+      <div id="panel-appearance" class="view-panel">
+        <div class="section-title">01 / IDENTITY (基本人設)</div>
+        <div class="input-group"><label class="label">DISPLAY NAME (顯示名稱)</label><input type="text" class="god-input" id="shopNameInput" oninput="syncPreview()"></div>
+        <div class="input-group"><label class="label">WELCOME MESSAGE (歡迎語)</label><input type="text" class="god-input" id="welcomeInput" oninput="syncPreview()"></div>
+        
+        <div class="section-title">02 / VISUAL CORE (視覺氛圍)</div>
+        <div class="input-group"><label class="label">ATMOSPHERE SELECTION</label><div class="color-grid" id="themeGrid"></div></div>
+      </div>
 
-      <!-- 數據洞察區塊 -->
-      <div class="section-title">04 / DATA INSIGHTS (數據洞察)</div>
-      <div class="insight-card">
-          <div style="font-size:11px; font-weight:700; margin-bottom:15px; color:var(--accent);">TOP QUESTIONS (點擊熱度排行)</div>
-          <div id="statsContainer" style="min-height:50px;">LOADING...</div>
+      <!-- ============================================== -->
+      <!-- VIEW 4: SYSTEM (系統與部署) -->
+      <!-- ============================================== -->
+      <div id="panel-system" class="view-panel">
+        <div class="section-title">01.5 / CONTACT NODES (聯絡節點)</div>
+        <div class="grid-2">
+          <div class="input-group"><label class="label">PHONE LINK</label><input type="text" class="god-input" id="phoneInput" oninput="syncPreview()"></div>
+          <div class="input-group"><label class="label">EMAIL LINK</label><input type="text" class="god-input" id="mailInput" oninput="syncPreview()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="input-group"><label class="label">LINE ID</label><input type="text" class="god-input" id="lineInput" oninput="syncPreview()"></div>
+          <div class="input-group"><label class="label">INSTAGRAM</label><input type="text" class="god-input" id="igInput" oninput="syncPreview()"></div>
+        </div>
+        <div class="grid-2">
+          <div class="input-group"><label class="label">FACEBOOK</label><input type="text" class="god-input" id="fbInput" oninput="syncPreview()"></div>
+          <div class="input-group"><label class="label">THREADS</label><input type="text" class="god-input" id="threadsInput" oninput="syncPreview()"></div>
+        </div>
+
+        <div class="section-title">SYSTEM DEPLOYMENT (部署)</div>
+        <button class="btn-main" id="saveBtn" onclick="saveData()">DEPLOY CHANGES (儲存設定)</button>
+        
+        <div style="text-align:center; margin-top:30px;">
+          <button onclick="handleLogout()" style="background:transparent; border:1px solid #500; color:#f55; padding:10px 20px; cursor:pointer; font-size:10px;">結束畫面 (LOGOUT)</button>
+        </div>
       </div>
-      <div class="insight-card">
-          <div style="font-size:11px; font-weight:700; margin-bottom:15px; color:var(--accent);">RECENT LOGS (最近對話紀錄)</div>
-          <div id="logsContainer" style="min-height:50px;">LOADING...</div>
-      </div>
-      
-      <button class="btn-main" id="saveBtn" onclick="saveData()">DEPLOY CHANGES (儲存設定)</button>
-      
-      <div style="text-align:center; margin-top:30px;">
-        <button onclick="handleLogout()" style="background:transparent; border:1px solid #500; color:#f55; padding:10px 20px; cursor:pointer; font-size:10px;">結束畫面 (LOGOUT)</button>
-      </div>
+
     </div>
+
+    <!-- NAVIGATION DOCK (底部導航塢) -->
+    <div class="nav-dock">
+      <button class="dock-btn active" onclick="switchView('panel-dashboard', this)" data-label="DASHBOARD"><i class="fas fa-chart-line"></i></button>
+      <button class="dock-btn" onclick="switchView('panel-neural', this)" data-label="NEURAL"><i class="fas fa-brain"></i></button>
+      <button class="dock-btn" onclick="switchView('panel-appearance', this)" data-label="APPEARANCE"><i class="fas fa-palette"></i></button>
+      <button class="dock-btn" onclick="switchView('panel-system', this)" data-label="SYSTEM"><i class="fas fa-sliders-h"></i></button>
+    </div>
+
   </div>
   <div class="preview-deck">
     <div class="phone-frame" id="phoneFrame">
@@ -207,6 +323,24 @@ async function init() {
     }
 }
 
+// ========================================================
+// View Switching Logic (God Mode Dock)
+// ========================================================
+function switchView(panelId, btnElement) {
+  // 1. 隱藏所有面板
+  document.querySelectorAll('.view-panel').forEach(el => {
+    el.classList.remove('active-panel');
+    setTimeout(() => el.scrollTop = 0, 300); // Reset scroll
+  });
+  
+  // 2. 顯示目標面板
+  document.getElementById(panelId).classList.add('active-panel');
+  
+  // 3. 更新按鈕狀態
+  document.querySelectorAll('.dock-btn').forEach(btn => btn.classList.remove('active'));
+  btnElement.classList.add('active');
+}
+
 let isPreviewMode = false;
 function toggleView() {
   if (window.innerWidth > 1000) { syncPreview(); return; }
@@ -226,12 +360,9 @@ function copyLink() {
     alert("連結已複製！");
 }
 
-// ★★★ 核心修正：自動開戶邏輯 (Auto-Create Profile) ★★★
 async function loadProfile() {
-    // 1. 嘗試讀取檔案
     let { data, error } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
     
-    // 2. 如果找不到檔案 (PGRST116) 代表是新用戶 -> 自動建立
     if (error && error.code === 'PGRST116') {
         console.log("偵測到新用戶，正在初始化神經網路...");
         const newProfile = {
@@ -242,18 +373,11 @@ async function loadProfile() {
             theme_color: '#00f260',
             updated_at: new Date()
         };
-        // 寫入資料庫
         const { data: createdProfile, error: createError } = await supabaseClient.from('profiles').insert([newProfile]).select().single();
-        
-        if (createError) {
-            console.error("初始化失敗:", createError);
-            alert("系統初始化失敗，請聯繫管理員。");
-            return;
-        }
-        data = createdProfile; // 使用剛建立的檔案
+        if (createError) { console.error("初始化失敗:", createError); return; }
+        data = createdProfile;
     }
 
-    // 3. 填入資料到介面
     if (data) {
         document.getElementById('shopNameInput').value = data.brand_name || '';
         document.getElementById('welcomeInput').value = data.welcome_msg || '';
@@ -327,12 +451,11 @@ async function loadAnalytics() {
     }
 }
 
-// ★★★ 核心修正：儲存邏輯改為 UPSERT (更安全) ★★★
 async function saveData() {
     const btn = document.getElementById('saveBtn'); btn.innerText = "UPLOADING..."; btn.disabled = true;
     
     const updates = {
-        id: currentUser.id, // 確保有 ID，讓 upsert 知道是哪一筆
+        id: currentUser.id, 
         brand_name: document.getElementById('shopNameInput').value,
         welcome_msg: document.getElementById('welcomeInput').value,
         link_phone: document.getElementById('phoneInput').value,
@@ -345,7 +468,6 @@ async function saveData() {
         updated_at: new Date()
     };
     
-    // 使用 upsert 取代 update，如果資料不存在會自動建立
     await supabaseClient.from('profiles').upsert(updates);
 
     for (const item of appState.qaList) {
