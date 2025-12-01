@@ -71,7 +71,7 @@
         }
 
         .gesture-hint {
-            position: absolute; bottom: 80px; /*稍微上移，留空間給箭頭*/
+            position: absolute; bottom: 80px; 
             color: #555; font-size: 14px; letter-spacing: 2px;
             animation: pulse 2s infinite 1s;
             text-transform: uppercase; opacity: 0; animation-fill-mode: forwards;
@@ -79,7 +79,7 @@
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* 新增：呼吸箭頭引導 (Jobs Update) */
+        /* 呼吸箭頭引導 */
         .scroll-indicator {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
             color: rgba(255, 255, 255, 0.5); font-size: 24px;
@@ -155,7 +155,7 @@
 
 
         /* =========================================
-           RWD 核心 (賈伯斯混合動力模式)
+           RWD 核心 (賈伯斯混合動力模式 - 修正版)
            ========================================= */
         @media (max-width: 1024px) { 
             html, body {
@@ -171,8 +171,11 @@
             }
 
             section {
+                /* 【關鍵修正】: 使用 svh (Small Viewport Height) */
+                /* 這確保在手機上有網址列時，內容也不會被遮住 */
                 height: auto !important; 
-                min-height: 100vh; 
+                min-height: 100vh; /* 相容舊瀏覽器 */
+                min-height: 100svh; /* 針對現代手機瀏覽器的精確修正 */
                 padding: 80px 20px 40px 20px;
             }
 
@@ -213,14 +216,13 @@
             }
             .cta-btn { width: 100%; max-width: 280px; padding: 14px 0; }
 
-            /* 手機版隱藏舊的文字提示，但保留新的箭頭並調整位置 */
             .gesture-hint { display: none !important; }
             .cursor-follower, .footer-stamp { display: none !important; }
 
-            /* 確保箭頭在手機上可見，並作為往下滑的提示 */
+            /* 【關鍵修正】: 提升箭頭位置，確保不被底部操作條遮擋 */
             .scroll-indicator {
-                bottom: 20px; /* 手機版稍微靠下 */
-                font-size: 20px;
+                bottom: 40px; /* 從 20px 提升到 40px，更安全 */
+                font-size: 24px;
             }
         }
     </style>
@@ -244,13 +246,12 @@
         <section class="brand-section">
             <h1 class="brand-title notranslate">YOYI</h1>
             
-            <!-- 原本的文字提示 (電腦版保留氛圍) -->
             <div class="gesture-hint">
                 <i class="fas fa-hand-pointer gesture-icon"></i>
                 Drag / Swipe to Future
             </div>
 
-            <!-- 賈伯斯修改：新增直覺引導箭頭 (Mobile/Desktop 通用) -->
+            <!-- 直覺引導箭頭 -->
             <div class="scroll-indicator" onclick="handleScrollClick()">
                 <i class="fa-solid fa-chevron-down"></i>
             </div>
@@ -300,19 +301,16 @@
         let startX = 0;
         let isDragging = false;
 
-        // 滑鼠游標跟隨
         document.addEventListener('mousemove', (e) => {
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
         });
 
-        // 處理箭頭點擊 (新增功能)
+        // 處理箭頭點擊
         function handleScrollClick() {
             if (window.innerWidth <= 1024) {
-                // 手機版：原生滾動到第二區塊
                 document.getElementById('section-product').scrollIntoView({ behavior: 'smooth' });
             } else {
-                // 電腦版：使用手勢引擎切換
                 nextSection();
             }
         }
@@ -356,7 +354,6 @@
         document.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
         document.addEventListener('mouseup', e => onEnd(e.clientX, e.clientY));
         
-        // 滾輪切換
         let isScrolling = false;
         document.addEventListener('wheel', (e) => {
             if (window.innerWidth <= 1024) return;
