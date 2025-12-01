@@ -41,8 +41,17 @@
   .monolith-dock { flex: 0 0 auto; padding: 0 0 calc(20px + env(safe-area-inset-bottom)) 0; background: linear-gradient(to top, #000 40%, transparent); display: flex; flex-direction: column; gap: 15px; z-index: 20; }
   .orbit-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
   .orbit-bar { display: flex; gap: 10px; overflow-x: auto; padding: 5px 24px; scrollbar-width: none; flex: 1; scroll-behavior: smooth; }
-  .orbit-chip { flex: 0 0 auto; padding: 10px 20px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: rgba(255,255,255,0.9); font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: 0.3s; backdrop-filter: blur(10px); white-space: nowrap; font-family: inherit; border-radius: 4px; }
-  .orbit-chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,255,255,0.1); }
+
+  /* 捲動箭頭樣式 */
+  .scroll-btn-right {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 40px;
+    background: linear-gradient(to left, #000 40%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 5; cursor: pointer; color: var(--accent);
+    animation: bounceRight 2s infinite;
+    display: none; /* 預設隱藏，由 JS 控制 */
+  }
+  @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
 
   .core-input-wrapper { margin: 0 24px; height: 50px; border-bottom: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 15px; transition: 0.3s; }
   .core-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
@@ -124,13 +133,19 @@
 
 <div class="stream-viewport" id="chatBody"></div>
 
+====這是要替換的內容 (加入箭頭 + 改中文)：====
 <div class="monolith-dock">
   <div class="orbit-wrapper">
     <div class="orbit-bar" id="quickActions"></div>
+    <!-- 補回箭頭按鈕 -->
+    <div class="scroll-btn-right" id="scrollArrow" onclick="scrollMenu()">
+        <i class="fas fa-chevron-right"></i>
+    </div>
   </div>
   <div class="core-input-wrapper">
     <input type="text" class="core-input" id="userInput" placeholder="輸入訊息..." autocomplete="off">
-    <button class="transmit-btn" onclick="handleSend()">TRANSMIT</button>
+    <!-- 改為中文 -->
+    <button class="transmit-btn" onclick="handleSend()">送出</button>
   </div>
 </div>
 
@@ -189,12 +204,13 @@ function applyTheme(profile) {
   document.getElementById("statusLight").style.boxShadow = `0 0 10px ${color}`;
 }
 
+
 function renderSocials(profile) {
     const deck = document.getElementById('socialDeck'); deck.innerHTML = '';
     const links = [
         { icon: 'fas fa-phone', val: profile.link_phone, type: 'tel' },
         { icon: 'fas fa-envelope', val: profile.link_mail, type: 'mailto' },
-        { icon: 'fab fa-line', val: profile.link_line },
+        { icon: 'fab fa-line', val: profile.link_line, type: 'line' }, // 標記為 line 類型
         { icon: 'fab fa-instagram', val: profile.link_ig },
         { icon: 'fab fa-facebook-f', val: profile.link_fb },
         { icon: 'fas fa-at', val: profile.link_threads }
@@ -203,9 +219,26 @@ function renderSocials(profile) {
         if (link.val) {
             const a = document.createElement('a'); a.className = 'nav-btn';
             let href = link.val;
-            if (link.type === 'tel') href = `tel:${link.val}`;
-            else if (link.type === 'mailto') href = `mailto:${link.val}`;
-            else if (!href.startsWith('http')) href = `https://${href}`;
+            
+            // 智能連結處理
+            if (link.type === 'tel') {
+                href = `tel:${link.val}`;
+            } else if (link.type === 'mailto') {
+                href = `mailto:${link.val}`;
+            } else if (link.type === 'line') {
+                // LINE 特殊處理：如果是連結直接用，如果是 ID 則加上前綴
+                if (href.startsWith('http')) {
+                     // 保持原樣
+                } else if (href.startsWith('@')) {
+                     href = `https://line.me/R/ti/p/${href}`; // 官方帳號
+                } else {
+                     href = `https://line.me/ti/p/~${href}`; // 個人 ID
+                }
+            } else {
+                // 其他社群連結 (IG/FB/Threads)
+                if (!href.startsWith('http')) href = `https://${href}`;
+            }
+
             a.href = href; a.target = '_blank';
             a.innerHTML = `<i class="${link.icon}"></i>`;
             deck.appendChild(a);
@@ -213,17 +246,48 @@ function renderSocials(profile) {
     });
 }
 
+
+
 function updateOrbit(faqs) {
   const bar = document.getElementById("quickActions"); bar.innerHTML = "";
+  const arrow = document.getElementById("scrollArrow");
+  
   if(faqs && faqs.length > 0) {
     faqs.forEach(item => {
       const chip = document.createElement("button"); chip.className = "orbit-chip";
       chip.innerText = item.question;
-      chip.onclick = () => handleInput(item.question, item.answer, item.id); // 綁定 ID 用於計數
+      chip.onclick = () => handleInput(item.question, item.answer, item.id);
       bar.appendChild(chip);
     });
+    // 檢查是否需要顯示箭頭 (延遲一下等待渲染)
+    setTimeout(() => {
+        if (bar.scrollWidth > bar.clientWidth) {
+            arrow.style.display = "flex";
+        } else {
+            arrow.style.display = "none";
+        }
+    }, 100);
+  } else {
+     if(arrow) arrow.style.display = "none";
   }
 }
+
+// 新增：捲動功能
+function scrollMenu() {
+    const bar = document.getElementById("quickActions");
+    bar.scrollBy({ left: 150, behavior: 'smooth' });
+}
+// 新增：監聽捲動以隱藏箭頭
+document.getElementById("quickActions").addEventListener("scroll", function() {
+   const bar = this;
+   const arrow = document.getElementById("scrollArrow");
+   if(bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 10) {
+       arrow.style.opacity = "0"; 
+   } else {
+       arrow.style.opacity = "1";
+   }
+});
+
 
 // ========================================================
 // 新增：寫入 Log 的功能
