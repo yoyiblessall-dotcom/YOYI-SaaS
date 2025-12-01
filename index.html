@@ -169,14 +169,36 @@
 
             /* 5. 手機模型：寬度 75vw，氣勢足，但限制高度避免蓋住文字 */
             .phone-mockup-wrapper {
-                width: 75vw;
-                height: auto;
-                aspect-ratio: 9/19;
-                max-height: 55vh; /* 關鍵：留空間給下面的字 */
-                flex-shrink: 1;
+                /* 1. 不再用 % 讓它忽大忽小，直接給一個最完美的展示寬度 */
+                width: 280px !important;
+                
+                /* 2. 這是關鍵：強制鎖定 iPhone 的修長比例，拒絕肥胖 */
+                aspect-ratio: 9 / 19 !important;
+                height: auto !important; /* 高度自動根據比例計算 */
+                
+                flex-shrink: 0; /* 禁止被壓縮 */
                 order: -1; 
-                margin-top: 10px;
-                animation: none; /* 手機版不浮動，避免干擾閱讀 */
+                margin-top: 20px;
+                margin-bottom: 20px;
+                
+                /* 恢復一點點懸浮感，但不要太誇張 */
+                animation: floatPhone 6s ease-in-out infinite; 
+            }
+
+            .phone-bezel {
+                border-width: 6px; /* 手機變小，邊框要跟著變細才精緻 */
+                border-radius: 35px; /* 圓角比例修正 */
+                box-shadow: 
+                    0 0 0 2px #333,
+                    0 20px 40px rgba(0,0,0,0.6); /* 陰影收斂一點，更有實體感 */
+            }
+
+            /* 瀏海也要跟著縮小，不然會像貼錯貼紙 */
+            .notch {
+                width: 80px;
+                height: 20px;
+                border-radius: 15px;
+                top: 12px;
             }
 
             /* 6. 文字區塊：保證不被切掉 */
