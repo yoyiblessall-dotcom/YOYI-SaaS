@@ -22,6 +22,7 @@
             overflow: hidden; 
             background-color: #000; color: #fff;
             font-family: 'Noto Sans TC', sans-serif;
+            scroll-behavior: smooth; /* 增加原生平滑滾動 */
         }
 
         /* --- 1. 導航 --- */
@@ -70,23 +71,34 @@
         }
 
         .gesture-hint {
-            position: absolute; bottom: 50px; color: #555; font-size: 14px; letter-spacing: 2px;
+            position: absolute; bottom: 80px; /*稍微上移，留空間給箭頭*/
+            color: #555; font-size: 14px; letter-spacing: 2px;
             animation: pulse 2s infinite 1s;
             text-transform: uppercase; opacity: 0; animation-fill-mode: forwards;
             display: flex; flex-direction: column; align-items: center; gap: 10px;
             font-family: 'Orbitron', sans-serif;
         }
 
-        /* --- 4. 第二屏：產品展示 (融合了你的備份結構與手機模型) --- */
+        /* 新增：呼吸箭頭引導 (Jobs Update) */
+        .scroll-indicator {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5); font-size: 24px;
+            cursor: pointer; z-index: 10;
+            opacity: 0; animation: fadeInArrow 1s ease-out 1.5s forwards, bounceArrow 2s infinite 2s;
+            pointer-events: auto;
+        }
+        .scroll-indicator:hover { color: #fff; }
+
+        /* --- 4. 第二屏：產品展示 --- */
         .product-section { background: #050505; }
         
         .product-container {
             width: 85%; max-width: 1200px; 
-            display: grid; grid-template-columns: 1fr 1fr; /* 電腦版維持左右佈局 */
+            display: grid; grid-template-columns: 1fr 1fr;
             gap: 80px; align-items: center; justify-items: center;
         }
 
-        /* 手機外框容器 (電腦版設定) */
+        /* 手機外框容器 */
         .phone-mockup-wrapper {
             position: relative;
             width: 320px; height: 650px;
@@ -128,80 +140,66 @@
         .cursor-follower { position: fixed; top: 0; left: 0; width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: width 0.3s, height 0.3s; }
         body.active .cursor-follower { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-color: #fff; }
 
+        /* 動畫定義 */
         @keyframes bigBang { 0% { opacity: 0; transform: scale(0.1); filter: blur(20px); } 100% { opacity: 1; transform: scale(1); filter: blur(0); } }
         @keyframes pulse { 0% { opacity: 0; transform: translateY(10px); } 50% { opacity: 1; transform: translateY(0); } 100% { opacity: 0.5; transform: translateY(5px); } }
         @keyframes floatPhone { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        /* 箭頭動畫 */
+        @keyframes fadeInArrow { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounceArrow { 
+            0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); } 
+            40% { transform: translate(-50%, -10px); } 
+            60% { transform: translate(-50%, -5px); } 
+        }
 
 
         /* =========================================
            RWD 核心 (賈伯斯混合動力模式)
            ========================================= */
         @media (max-width: 1024px) { 
-            /* 1. 解鎖滾動：手機版允許滑動，不再鎖死一頁 */
             html, body {
                 overflow-y: auto !important; 
                 height: auto !important;
                 position: static !important;
             }
 
-            /* 2. 禁用手勢引擎的 JS 位移，改用自然排列 */
             #viewport {
                 transform: none !important; 
                 height: auto !important;
                 overflow: visible !important;
             }
 
-            /* 3. 讓每個區塊至少一屏高，但內容多了可以自動長高 */
             section {
                 height: auto !important; 
                 min-height: 100vh; 
-                padding: 80px 20px 40px 20px; /* 避開 Nav */
+                padding: 80px 20px 40px 20px;
             }
 
-            /* 4. 手機版佈局 (剛剛調整好的霸氣版) */
             .product-container { 
-                grid-template-columns: 1fr; /* 單欄 */
+                grid-template-columns: 1fr;
                 display: flex; flex-direction: column;
                 justify-content: center; align-items: center;
                 gap: 20px;
                 padding-bottom: 40px;
             }
 
-            /* 5. 手機模型：寬度 75vw，氣勢足，但限制高度避免蓋住文字 */
             .phone-mockup-wrapper {
-                /* 1. 不再用 % 讓它忽大忽小，直接給一個最完美的展示寬度 */
                 width: 280px !important;
-                
-                /* 2. 這是關鍵：強制鎖定 iPhone 的修長比例，拒絕肥胖 */
                 aspect-ratio: 9 / 19 !important;
-                height: auto !important; /* 高度自動根據比例計算 */
-                
-                flex-shrink: 0; /* 禁止被壓縮 */
-                order: -1; 
-                margin-top: 20px;
-                margin-bottom: 20px;
-                
-                /* 恢復一點點懸浮感，但不要太誇張 */
+                height: auto !important;
+                flex-shrink: 0; order: -1; 
+                margin-top: 20px; margin-bottom: 20px;
                 animation: floatPhone 6s ease-in-out infinite; 
             }
 
             .phone-bezel {
-                border-width: 6px; /* 手機變小，邊框要跟著變細才精緻 */
-                border-radius: 35px; /* 圓角比例修正 */
-                box-shadow: 
-                    0 0 0 2px #333,
-                    0 20px 40px rgba(0,0,0,0.6); /* 陰影收斂一點，更有實體感 */
+                border-width: 6px; border-radius: 35px;
+                box-shadow: 0 0 0 2px #333, 0 20px 40px rgba(0,0,0,0.6);
             }
 
-            /* 瀏海也要跟著縮小，不然會像貼錯貼紙 */
-            .notch {
-                width: 80px;
-                height: 20px;
-                border-radius: 15px;
-                top: 12px;
-            }
+            .notch { width: 80px; height: 20px; border-radius: 15px; top: 12px; }
 
-            /* 6. 文字區塊：保證不被切掉 */
             .product-info { 
                 width: 100%; text-align: center; 
                 display: flex; flex-direction: column; align-items: center; 
@@ -215,8 +213,15 @@
             }
             .cta-btn { width: 100%; max-width: 280px; padding: 14px 0; }
 
-            /* 7. 隱藏不必要的電腦版元素 */
-            .gesture-hint, .cursor-follower, .footer-stamp { display: none !important; }
+            /* 手機版隱藏舊的文字提示，但保留新的箭頭並調整位置 */
+            .gesture-hint { display: none !important; }
+            .cursor-follower, .footer-stamp { display: none !important; }
+
+            /* 確保箭頭在手機上可見，並作為往下滑的提示 */
+            .scroll-indicator {
+                bottom: 20px; /* 手機版稍微靠下 */
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -232,27 +237,33 @@
         <a href="auth.html" class="login-btn notranslate">LOGIN</a>
     </nav>
 
-    <!-- 視口容器：未來你可以加 section3, section4... -->
+    <!-- 視口容器 -->
     <div id="viewport">
         
         <!-- 第一屏：品牌主視覺 -->
         <section class="brand-section">
             <h1 class="brand-title notranslate">YOYI</h1>
+            
+            <!-- 原本的文字提示 (電腦版保留氛圍) -->
             <div class="gesture-hint">
                 <i class="fas fa-hand-pointer gesture-icon"></i>
                 Drag / Swipe to Future
             </div>
+
+            <!-- 賈伯斯修改：新增直覺引導箭頭 (Mobile/Desktop 通用) -->
+            <div class="scroll-indicator" onclick="handleScrollClick()">
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
         </section>
 
         <!-- 第二屏：數位分身 (產品 1) -->
-        <section class="product-section">
+        <section class="product-section" id="section-product">
             <div class="product-container">
                 
-                <!-- 手機模型 (連結到 SA.html) -->
+                <!-- 手機模型 -->
                 <a href="SA.html" class="phone-mockup-wrapper">
                     <div class="phone-bezel">
                         <div class="notch"></div>
-                        <!-- 請確保 mobile_cover.png 存在，或改為你的截圖 -->
                         <img src="mobile_cover.png" alt="YOYI OS Interface" onerror="this.src='https://via.placeholder.com/320x650/000/0f0?text=OPEN+YOYI+OS';">
                     </div>
                 </a>
@@ -276,12 +287,10 @@
             <div class="footer-stamp">© 2025 YOYI Inc. Designed in the Future.</div>
         </section>
 
-        <!-- 未來如果你要加新產品，直接複製上面的 section 貼在這裡即可 -->
-
     </div>
 
     <script>
-        // --- 手勢引擎 (僅在電腦版生效，手機版會被 CSS 禁用) ---
+        // --- 手勢引擎 ---
         const viewport = document.getElementById('viewport');
         const cursor = document.getElementById('cursor');
         let currentSection = 0;
@@ -297,10 +306,19 @@
             cursor.style.top = e.clientY + 'px';
         });
 
+        // 處理箭頭點擊 (新增功能)
+        function handleScrollClick() {
+            if (window.innerWidth <= 1024) {
+                // 手機版：原生滾動到第二區塊
+                document.getElementById('section-product').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // 電腦版：使用手勢引擎切換
+                nextSection();
+            }
+        }
+
         const onStart = (x, y) => {
-            // 如果是手機版 (寬度小於 1024)，完全不執行手勢邏輯
             if (window.innerWidth <= 1024) return;
-            
             isDragging = true;
             startX = x;
             startY = y;
@@ -338,10 +356,10 @@
         document.addEventListener('mousedown', e => onStart(e.clientX, e.clientY));
         document.addEventListener('mouseup', e => onEnd(e.clientX, e.clientY));
         
-        // 滾輪切換 (同樣只在電腦版生效)
+        // 滾輪切換
         let isScrolling = false;
         document.addEventListener('wheel', (e) => {
-            if (window.innerWidth <= 1024) return; // 手機版用原生滾動
+            if (window.innerWidth <= 1024) return;
             if (isScrolling) return;
             isScrolling = true;
             if (e.deltaY > 0) nextSection();
