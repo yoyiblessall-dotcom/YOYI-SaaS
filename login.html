@@ -2,423 +2,498 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
-user-scalable=no, viewport-fit=cover,
-interactive-widget=resizes-content">
-<title>YOYI | Digital
-Twin</title>
-<link
-href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap"
-rel="stylesheet">
-<link
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-rel="stylesheet">
-<script
-src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<title>YOYI | Digital Twin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
- :root { --accent: #00f260; --glow: rgba(0, 242, 96, 0.4); --bg-deep:
-#000; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.15);
---aurora-1: #00f260; --aurora-2: #0575e6; --aurora-3: #00f260; }
-  * {
-box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
- body { margin: 0; padding: 0; font-family: 'Space Grotesk',
--apple-system, "Microsoft JhengHei", sans-serif; background-color:
-var(--bg-deep); color: #fff; height: 100dvh; width: 100vw; display: flex;
-flex-direction: column; overflow: hidden; }
- .aether-void { position: absolute; inset: -50%; background:
-conic-gradient(from 0deg, transparent 0deg, var(--aurora-1) 60deg, transparent
-120deg, var(--aurora-2) 180deg, transparent 240deg, var(--aurora-3) 300deg,
-transparent 360deg); filter: blur(90px); opacity: 0.35; animation: rotateVoid
-30s linear infinite; z-index: -1; transition: all 2s ease; }
- .noise-overlay { position: absolute; inset: 0; background:
-url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200'
-xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence
-type='fractalNoise' baseFrequency='0.7' numOctaves='3'
-stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25'
-filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:
-none; z-index: -1; }
- @keyframes rotateVoid { from { transform: rotate(0deg); } to {
-transform: rotate(360deg); } }
- @keyframes pulse { 0%, 100% { box-shadow: 0 0 10px var(--accent); } 50%
-{ box-shadow: 0 0 25px var(--accent); } }
- .hud-top { flex: 0 0 auto; padding: calc(20px +
-env(safe-area-inset-top)) 24px 20px 24px; display: flex; justify-content:
-space-between; align-items: center; border-bottom: 1px solid
-rgba(255,255,255,0.05); background: linear-gradient(to bottom, rgba(0,0,0,0.8),
-transparent); backdrop-filter: blur(10px); z-index: 10; }
- .brand-logo { font-size: 16px; letter-spacing: 1px; font-weight: 700;
-color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 10px; }
- .status-light { width: 6px; height: 6px; background: var(--accent);
-border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: pulse 2s
-infinite; }
- .nav-actions { display: flex; gap: 12px; }
- .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid
-var(--border); color: rgba(255,255,255,0.9); text-decoration: none; font-size:
-14px; width: 36px; height: 36px; display: flex; align-items: center;
-justify-content: center; border-radius: 50%; transition: 0.3s; }
- .nav-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0
-15px var(--glow); transform: scale(1.1); }
- .stream-viewport { flex: 1; overflow-y: auto; padding: 30px 24px;
-display: flex; flex-direction: column; gap: 24px; mask-image:
-linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent
-100%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black
-10%, black 90%, transparent 100%); }
- .stream-viewport::-webkit-scrollbar { width: 0; }
- .bot-msg { background: var(--glass); border: 1px solid var(--border);
-border-radius: 12px; padding: 20px; max-width: 85%; align-self: flex-start;
-position: relative; backdrop-filter: blur(10px); animation: fadeIn 0.4s ease-out;
-}
- .user-msg { background: var(--accent); color: #000; border-radius: 12px;
-padding: 15px; max-width: 85%; align-self: flex-end; font-weight: 600;
-animation: fadeInRight 0.4s ease-out; }
- .bot-text { font-size: 14px; line-height: 1.6; color:
-rgba(255,255,255,0.9); }
- .welcome-msg { font-size: 18px; font-weight: 700; letter-spacing: 1px;
-margin-bottom: 5px; color: var(--accent); text-shadow: 0 0 10px
-rgba(0,0,0,0.5); }
- .qa-prompt { font-size: 12px; color: rgba(255,255,255,0.4); margin-top:
-15px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
- .qa-deck { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;
-}
- .qa-btn { background: rgba(255,255,255,0.1); border: 1px solid
-var(--border); color: #fff; padding: 10px 18px; border-radius: 20px;
-font-size: 13px; cursor: pointer; transition: 0.3s; white-space: nowrap;
-max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-family:
-inherit; }
- .qa-btn:hover { background: var(--accent); color: #000; border-color:
-var(--accent); box-shadow: 0 0 10px var(--glow); }
- .input-hud { flex: 0 0 auto; padding: 15px 24px
-calc(15px + env(safe-area-inset-bottom)) 24px; border-top: 1px solid
-rgba(255,255,255,0.05); background: #000; z-index: 10; display: flex; gap:
-10px; }
- .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px
-solid var(--border); border-radius: 25px; color: #fff; padding: 10px 15px;
-font-size: 14px; font-family: inherit; transition: 0.3s; }
- .chat-input:focus { border-color: var(--accent); background:
-rgba(255,255,255,0.1); }
- .send-btn { width: 40px; height: 40px; background: var(--accent); color:
-#000; border: none; border-radius: 50%; display: flex; align-items: center;
-justify-content: center; cursor: pointer; transition: 0.3s; }
- .send-btn:hover { opacity: 0.8; box-shadow: 0 0 10px var(--glow); }
- .contact-bar { margin-top: 20px; padding-top: 15px; border-top: 1px
-solid var(--border); display: flex; justify-content: center; gap: 20px; }
- .contact-link { color: rgba(255,255,255,0.7); font-size: 18px;
-transition: 0.3s; }
- .contact-link:hover { color: var(--accent); transform: scale(1.1); }
- .loader-bubble { width: 30px; height: 10px; display: flex;
-align-items: center; justify-content: space-around; }
- .loader-dot { width: 6px; height: 6px; background: var(--accent);
-border-radius: 50%; animation: loading 1.4s infinite ease-in-out both; }
- .loader-dot:nth-child(1) { animation-delay: -0.32s; }
- .loader-dot:nth-child(2) { animation-delay: -0.16s; }
- @keyframes loading { 0%, 80%, 100% { transform: scale(0); } 40% {
-transform: scale(1.0); } }
- @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to
-{ opacity: 1; transform: translateY(0); } }
- @keyframes fadeInRight { from { opacity: 0; transform: translateX(10px);
-} to { opacity: 1; transform: translateX(0); } }
- .uplink-gate { position: fixed; inset: 0; background: #000; z-index:
-9999; display: flex; flex-direction: column; align-items: center;
-justify-content: center; font-family: 'Space Grotesk', monospace; color: #fff;
-transition: opacity 0.5s; }
- .gate-ring { width: 50px; height: 50px; border: 2px solid
-rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%;
-animation: rotate 1s infinite linear; }
- @keyframes rotate { from { transform: rotate(0deg); } to { transform:
-rotate(360deg); } }
+  /* =========================================
+     CORE AESTHETICS (保留你的原始設計)
+     ========================================= */
+  :root {
+    --accent: #00f260; 
+    --glow: rgba(0, 242, 96, 0.4);
+    --bg-deep: #000;
+    --glass: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.15);
+    --aurora-1: #00f260; 
+    --aurora-2: #0575e6; 
+    --aurora-3: #00f260;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0; padding: 0;
+    font-family: 'Space Grotesk', -apple-system, "Microsoft JhengHei", sans-serif;
+    background-color: var(--bg-deep);
+    color: #fff;
+    height: 100dvh; 
+    width: 100vw;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* 背景動效 */
+  .aether-void {
+    position: absolute; inset: -50%;
+    background: conic-gradient(
+      from 0deg, transparent 0deg, var(--aurora-1) 60deg, transparent 120deg, var(--aurora-2) 180deg, transparent 240deg, var(--aurora-3) 300deg, transparent 360deg
+    );
+    filter: blur(90px); opacity: 0.35;
+    animation: rotateVoid 30s linear infinite; z-index: -1; transition: all 2s ease;
+  }
+  .noise-overlay {
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: -1;
+  }
+  @keyframes rotateVoid { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* HUD 頂部導航 */
+  .hud-top {
+    flex: 0 0 auto; 
+    padding: calc(20px + env(safe-area-inset-top)) 24px 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+    backdrop-filter: blur(10px); z-index: 10;
+  }
+  .brand-logo { font-size: 16px; letter-spacing: 1px; font-weight: 700; color: rgba(255,255,255,0.95); display: flex; align-items: center; gap: 10px; }
+  .status-light { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: pulse 2s infinite; }
+  
+  .nav-actions { display: flex; gap: 12px; }
+  .nav-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid var(--border); color: rgba(255,255,255,0.9);
+    text-decoration: none; font-size: 14px; width: 36px; height: 36px; 
+    display: flex; align-items: center; justify-content: center; 
+    border-radius: 50%; transition: 0.3s;
+  }
+  .nav-btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 15px var(--glow); transform: scale(1.1); }
+
+  /* 對話區塊 */
+  .stream-viewport {
+    flex: 1; overflow-y: auto; padding: 30px 24px;
+    display: flex; flex-direction: column; gap: 24px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+    scroll-behavior: smooth;
+  }
+  .node { display: flex; flex-direction: column; max-width: 88%; animation: driftUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .node.bot { align-self: flex-start; border-left: 2px solid var(--accent); padding-left: 18px; }
+  .node.user { align-self: flex-end; align-items: flex-end; border-right: 2px solid rgba(255,255,255,0.3); padding-right: 18px; }
+  .node-text { font-size: 15px; line-height: 1.6; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .node.bot .node-text { color: rgba(255,255,255,0.95); }
+  .node.user .node-text { color: var(--accent); text-align: right; }
+
+  /* 系統提示訊息 */
+  .node.sys-msg .node-text {
+    color: #00ffff;
+    font-size: 13px; font-weight: 500;
+    border-left: 2px solid #00ffff; padding-left: 12px;
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), transparent);
+    border-radius: 0 4px 4px 0; line-height: 1.6; letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+  }
+
+  /* 底部操作區 */
+  .monolith-dock {
+    flex: 0 0 auto; 
+    padding: 0 0 calc(20px + env(safe-area-inset-bottom)) 0;
+    background: linear-gradient(to top, #000 20%, rgba(0,0,0,0.8) 80%, transparent);
+    display: flex; flex-direction: column; gap: 15px; z-index: 20;
+    position: relative;
+  }
+
+  .orbit-wrapper { position: relative; width: 100%; display: flex; align-items: center; height: 50px; }
+  .orbit-bar {
+    display: flex; gap: 10px; overflow-x: auto; padding: 0 24px;
+    scrollbar-width: none; flex: 1; scroll-behavior: smooth;
+    align-items: center; height: 100%; padding-right: 60px;
+  }
+  .orbit-bar::-webkit-scrollbar { display: none; }
+
+  .orbit-chip {
+    flex: 0 0 auto; height: 38px; padding: 0 18px;
+    background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.4);
+    color: #ffffff; font-size: 14px; letter-spacing: 1px; font-weight: 600;
+    cursor: pointer; transition: 0.3s; backdrop-filter: blur(10px); 
+    white-space: nowrap; font-family: inherit; border-radius: 6px; 
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  .orbit-chip:hover, .orbit-chip:active {
+    border-color: var(--accent); color: #000; background: var(--accent);
+    box-shadow: 0 0 20px var(--glow); font-weight: 700;
+  }
+
+  .scroll-btn-right {
+    position: absolute; right: 0; top: 0; bottom: 0; 
+    width: 70px; background: linear-gradient(to left, #000 30%, transparent); 
+    display: flex; align-items: center; justify-content: center;
+    z-index: 30; cursor: pointer; pointer-events: auto; display: none; 
+  }
+  .scroll-circle {
+      width: 36px; height: 36px; border-radius: 50%; 
+      background: rgba(0, 0, 0, 0.9); border: 2px solid var(--accent); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(5px); box-shadow: 0 0 15px var(--glow); font-size: 16px;
+      animation: pulseGlow 1.5s infinite alternate;
+  }
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 5px var(--glow); transform: scale(1); }
+    100% { box-shadow: 0 0 20px var(--accent), 0 0 10px #fff; transform: scale(1.1); }
+  }
+
+  .core-input-wrapper {
+    margin: 0 24px; height: 50px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    display: flex; align-items: center; gap: 15px; transition: 0.3s;
+  }
+  .core-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
+  .transmit-btn { background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; font-weight: 500;}
+  .transmit-btn:hover { color: var(--accent); }
+
+  @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+  @keyframes driftUp { from { opacity: 0; transform: translateY(20px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+
+  /* 登入閘道 */
+  #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2147483647; display: none; justify-content: center; align-items: center; flex-direction: column; }
+  .login-box { width: 90%; max-width: 400px; background: rgba(20, 20, 20, 0.8); border: 1px solid #333; border-radius: 20px; padding: 40px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 0 50px rgba(0, 255, 136, 0.1); }
+  .login-title { color: #fff; font-size: 20px; margin-bottom: 20px; letter-spacing: 2px; }
+  .login-input { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #00ff88; font-family: monospace; text-align: center; font-size: 16px; border-radius: 10px; margin-bottom: 20px; outline: none; }
+  .login-btn { padding: 12px 30px; background: #00ff88; color: #000; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+  
+  /* 開機動畫層 */
+  .boot-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Space Grotesk', monospace; transition: opacity 1s ease; }
+  .glitch-text { font-size: 26px; letter-spacing: 3px; color: #fff; animation: glitch 1s infinite; }
+  @keyframes glitch { 0% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 2px 0 red, -2px 0 blue; } 100% { opacity: 1; } }
 </style>
 </head>
 <body>
- <div class="aether-void"></div>
- <div class="noise-overlay"></div>
- <div class="uplink-gate"
-id="uplinkGate"><div
-class="gate-ring"></div><div
-style="margin-top:20px; letter-spacing: 3px; font-size:
-12px;">ESTABLISHING UPLINK...</div></div>
 
- <div class="hud-top">
-   <div class="brand-logo"><div
-class="status-light"></div><span
-id="brandNameDisplay">YOYI</span></div>
-   <div class="nav-actions">
-     <a href="#" class="nav-btn"
-id="phoneLink"><i class="fas
-fa-phone-alt"></i></a>
-     <a href="#" class="nav-btn"
-id="mailLink"><i class="fas
-fa-envelope"></i></a>
-     <a href="#" class="nav-btn"
-id="socialLink"><i class="fas
-fa-share-alt"></i></a>
-   </div>
- </div>
+<!-- 登入閘道 -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <div class="login-title">SYSTEM LOGIN</div>
+        <p style="color:#888; font-size:12px; margin-bottom:20px;">請輸入您的系統 ID (Access Token)</p>
+        <input type="text" id="unique_gate_input" class="login-input" placeholder="Paste ID Here...">
+        <button class="login-btn" onclick="executeFinalLogin()">ENTER SYSTEM</button>
+    </div>
+</div>
 
- <div class="stream-viewport"
-id="chatStream">
-   <div class="bot-msg">
-     <div class="welcome-msg">Hi, I am YOYI.</div>
-     <div class="bot-text"
-id="welcomeMsgDisplay">系統初始化中...</div>
-     <div class="qa-prompt">QUICK ACCESS (快速提問)</div>
-     <div class="qa-deck"
-id="qaDeck"></div>
-   </div>
- </div>
-
- <div class="input-hud">
-   <input type="text" class="chat-input"
-id="chatInput" placeholder="輸入你的提問...">
-   <button class="send-btn"
-id="sendBtn"
-onclick="handleUserInput()"><i class="fas
-fa-arrow-up"></i></button>
- </div>
 <script>
-const supabaseUrl =
-'https://skkjzquxollefddyhtxt.supabase.co';
-const supabaseKey =
-'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNra2p6cXV4b2xsZWZkZHlodHh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTQ4NzMsImV4cCI6MjA4MDA3MDg3M30.S0tcaKijsb-rrJuZWeBn9uUr8geu63qKNa-cdgjS12I';
-const supabaseClient =
-supabase.createClient(supabaseUrl, supabaseKey);
-let currentUserId =
-null; let currentProfile = null; let qaRules = [];
-const themes = {
- pc_repair: { name: "TECH // GREEN", color: "#00f260", vars: {
-"--aurora-1": "#00f260", "--aurora-2":
-"#0575e6", "--aurora-3": "#00f260",
-"--accent": "#00f260", "--glow": "rgba(0,
-242, 96, 0.4)" } },
- restaurant: { name: "FOOD // ORANGE", color: "#ff9068", vars: {
-"--aurora-1": "#ff416c", "--aurora-2":
-"#ff4b1f", "--aurora-3": "#ff9068",
-"--accent": "#ff9068", "--glow": "rgba(255,
-144, 104, 0.4)" } },
- beauty: { name: "VOGUE // PURPLE", color: "#da77f2", vars: {
-"--aurora-1": "#833ab4", "--aurora-2":
-"#fd1d1d", "--aurora-3": "#fcb045",
-"--accent": "#da77f2", "--glow": "rgba(218,
-119, 242, 0.4)" } },
- real_estate: { name: "ESTATE // GOLD", color: "#F3F9A7", vars: {
-"--aurora-1": "#CAC531", "--aurora-2":
-"#F3F9A7", "--aurora-3": "#8E8D8A",
-"--accent": "#F3F9A7", "--glow": "rgba(243,
-249, 167, 0.4)" } },
- gym: { name: "GYM // LIME", color: "#38ef7d", vars: { "--aurora-1":
-"#11998e", "--aurora-2": "#38ef7d",
-"--aurora-3": "#000000", "--accent": "#38ef7d",
-"--glow": "rgba(56, 239, 125, 0.4)" } },
- car: { name: "AUTO // STEEL", color: "#4CA1AF", vars: { "--aurora-1":
-"#2C3E50", "--aurora-2": "#4CA1AF",
-"--aurora-3": "#C4E0E5", "--accent": "#4CA1AF",
-"--glow": "rgba(76, 161, 175, 0.4)" } },
- shop: { name: "SHOP // RED", color: "#FF512F", vars: { "--aurora-1":
-"#FF512F", "--aurora-2": "#DD2476",
-"--aurora-3": "#FF512F", "--accent": "#FF512F",
-"--glow": "rgba(255, 81, 47, 0.4)" } },
- clinic: { name: "MED // BLUE", color: "#00d2ff", vars: { "--aurora-1":
-"#00d2ff", "--aurora-2": "#3a7bd5",
-"--aurora-3": "#00d2ff", "--accent": "#00d2ff",
-"--glow": "rgba(0, 210, 255, 0.4)" } },
- plumbing: { name: "FIX // CYAN", color: "#26D0CE", vars: {
-"--aurora-1": "#1A2980", "--aurora-2":
-"#26D0CE", "--aurora-3": "#1A2980",
-"--accent": "#26D0CE", "--glow": "rgba(38,
-208, 206, 0.4)" } },
- tutor: { name: "STUDY // VIOLET", color: "#8E54E9", vars: {
-"--aurora-1": "#4776E6", "--aurora-2":
-"#8E54E9", "--aurora-3": "#4776E6",
-"--accent": "#8E54E9", "--glow": "rgba(142,
-84, 233, 0.4)" } }
-};
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentId = urlParams.get('id');
+        const overlay = document.getElementById('loginOverlay');
+        if (currentId) {
+            if (overlay) overlay.remove();
+        } else {
+            if (overlay) {
+                overlay.style.display = 'flex'; 
+                const myInput = document.getElementById('unique_gate_input');
+                if (myInput) {
+                    myInput.addEventListener("keypress", function(event) {
+                        if (event.key === "Enter") { event.preventDefault(); executeFinalLogin(); }
+                    });
+                    setTimeout(() => myInput.focus(), 100); 
+                }
+            }
+            const style = document.createElement('style');
+            style.innerHTML = `body > *:not(#loginOverlay):not(script) { display: none !important; }`;
+            document.head.appendChild(style);
+        }
+    })();
 
-window.onload = function() {
-   const urlParams = new URLSearchParams(window.location.search);
-   currentUserId = urlParams.get('id');
-   if (!currentUserId) {
-       alert('錯誤：缺少使用者 ID 參數。請確認連結是否正確。');
-       document.getElementById('uplinkGate').style.display = 'none';
-       return;
-   }
-   init();
-};
+    function executeFinalLogin() {
+        const inputEl = document.getElementById('unique_gate_input');
+        if (!inputEl) return;
+        const finalVal = inputEl.value.trim();
+        if (finalVal && finalVal.length > 5) window.location.href = window.location.pathname + '?id=' + finalVal;
+        else alert("錯誤：ID 無效！");
+    }
+</script>
 
+<div class="aether-void" id="aetherBg"></div>
+<div class="noise-overlay"></div>
+
+<!-- 開機畫面 - 更新品牌文字 (Steve Jobs Update) -->
+<div class="boot-screen" id="bootLayer">
+  <div class="glitch-text">YOYI SYSTEM</div>
+  <div style="margin-top:20px; font-size:12px; color:#666; letter-spacing:1px;" id="bootStatus">CONNECTING DIGITAL TWIN...</div>
+</div>
+
+<!-- 頂部 HUD (Translation Fix Included) -->
+<div class="hud-top">
+  <div class="brand-logo notranslate" translate="no">
+    <div class="status-light" id="statusLight"></div>
+    <span id="brandTitle">SYSTEM STANDBY</span>
+  </div>
+  <div class="nav-actions" id="socialDeck"></div>
+</div>
+
+<!-- 對話視窗 -->
+<div class="stream-viewport" id="chatBody"></div>
+
+<!-- 底部操作區 -->
+<div class="monolith-dock">
+  <div class="orbit-wrapper">
+    <div class="orbit-bar" id="quickActions"></div>
+    <div class="scroll-btn-right" id="scrollArrow" onclick="scrollMenu()">
+        <div class="scroll-circle">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </div>
+  </div>
+  <div class="core-input-wrapper">
+    <input type="text" class="core-input" id="userInput" placeholder="輸入訊息..." autocomplete="off">
+    <button class="transmit-btn" onclick="handleSend()">送出</button>
+  </div>
+</div>
+
+<script>
+// ========================================================
+// 設定與 Supabase 連線
+// ========================================================
+const supabaseUrl = 'https://skkjzquxollefddyhtxt.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNra2p6cXV4b2xsZWZkZHlodHh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0OTQ4NzMsImV4cCI6MjA4MDA3MDg3M30.S0tcaKijsb-rrJuZWeBn9uUr8geu63qKNa-cdgjS12I';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+const urlParams = new URLSearchParams(window.location.search);
+const CLIENT_ID = urlParams.get('id');
+let currentQnA = [];
+
+// ========================================================
+// 人格引擎：隨機語錄庫 (Warm & Humorous Fallback)
+// ========================================================
+const fallbackMessages = [
+    "這個問題我還沒被「本尊」輸入記憶... 😅 但我已經把你打的內容記下來了！下次說不定就會有這個按鈕囉！",
+    "哇，這題超出了我的資料庫！📂 我把這句話存入後台了，晚點讓我的真實身分親自來看。",
+    "我是他的 助理 分身，這題有點太深奧了！🤖 建議你先點點看下方的按鈕，那是他最想跟你分享的事。",
+    "我看不太懂這個關鍵字... 🤔 不過沒關係，你的留言我收到了！這會幫助我變得更聰明。",
+    "這個話題很有趣！但我目前只懂下方按鈕的內容。👇 要不要先看看那邊？或者直接點上方連結找我的本尊？",
+    "抱歉，我的大腦還在擴充中... ⚡ 你的輸入已經成為我的學習養分！如果有急事，請直接按上方的電話或 LINE 喔！",
+    "嘿！這題我答不出來 😂。但我老闆（也就是我本尊）稍後會在後台看到你問了這個，期待他更新答案吧！",
+    "看來你對這個很有興趣！👀 雖然我現在無法回答，但你可以試試看滑動下方的按鈕，也許有類似的驚喜？"
+];
+
+// ========================================================
+// 初始化 (Steve Jobs Update: Speed Optimization)
+// ========================================================
 async function init() {
-   try {
-       await loadProfile();
-       await loadQnARules();
-       renderQAButtons();
-       document.getElementById('uplinkGate').style.opacity = 0;
-       setTimeout(() => { document.getElementById('uplinkGate').style.display = 'none'; }, 500);
-       
-       // 啟用鍵盤事件
-       document.getElementById('chatInput').addEventListener('keypress', function(e) {
-           if (e.key === 'Enter') handleUserInput('input');
-       });
-    } catch (error) {
-       console.error('初始化失敗:', error);
-       document.getElementById('welcomeMsgDisplay').innerText = '載入錯誤，請稍後再試。';
-       document.getElementById('uplinkGate').style.display = 'none';
-    }
+  if (!CLIENT_ID) return;
+
+  try {
+    document.getElementById('bootStatus').innerText = "SYNCING DATA...";
+    
+    // 讀取設定
+    const { data: profile, error: err1 } = await supabaseClient.from('profiles').select('*').eq('id', CLIENT_ID).single();
+    if (err1 || !profile) throw new Error("ACCESS DENIED");
+
+    // 讀取問答
+    const { data: rules, error: err2 } = await supabaseClient.from('qna_rules').select('*').eq('user_id', CLIENT_ID).order('created_at', {ascending: true});
+    currentQnA = rules || [];
+
+    applyTheme(profile);
+    renderSocials(profile);
+    updateOrbit(currentQnA);
+
+    // [SPEED FIX] 加快進入速度
+    setTimeout(() => {
+        document.getElementById("bootLayer").style.opacity = 0;
+        // 縮短轉場等待
+        setTimeout(()=> document.getElementById("bootLayer").style.display = "none", 500);
+        setTimeout(() => { 
+            // 如果有歡迎語就用歡迎語，沒有就用預設
+            addNode("bot", profile.welcome_msg || "SYSTEM READY."); 
+        }, 300); // 縮短歡迎語延遲
+    }, 800); // 縮短初始等待 (原 1500)
+
+  } catch (e) {
+    console.error(e);
+    document.querySelector('.glitch-text').innerText = "CONNECTION_LOST";
+    document.querySelector('.glitch-text').style.color = "#ff3b30";
+  }
 }
 
-async function loadProfile() {
-   const { data, error } = await
-supabaseClient.from('profiles').select('*').eq('id',
-currentUserId).single();
-   if (error) throw new Error('無法載入分身資料');
-   currentProfile = data;
-   
-   // 應用視覺風格
-   applyVisualsByColor(currentProfile.theme_color || themes.pc_repair.color);
-
-   // 填充 HUD
-   document.title = `${currentProfile.brand_name} | YOYI`;
-   document.getElementById('brandNameDisplay').innerText =
-currentProfile.brand_name || 'YOYI';
-   document.getElementById('welcomeMsgDisplay').innerText =
-currentProfile.welcome_msg || '你好，我是你的 AI 助理，請問有什麼我可以幫你的？';
-
-   // 設置聯絡連結
-   document.getElementById('phoneLink').href =
-currentProfile.link_phone ? `tel:${currentProfile.link_phone}` : '#';
-   document.getElementById('phoneLink').style.display =
-currentProfile.link_phone ? 'flex' : 'none';
-   document.getElementById('mailLink').href =
-currentProfile.link_mail ? `mailto:${currentProfile.link_mail}` : '#';
-   document.getElementById('mailLink').style.display =
-currentProfile.link_mail ? 'flex' : 'none';
-   
-   // 社交連結整合到一個按鈕，讓畫面更簡潔
-   const hasSocial = currentProfile.link_line || currentProfile.link_ig ||
-currentProfile.link_fb || currentProfile.link_threads;
-   document.getElementById('socialLink').style.display = hasSocial ? 'flex'
-: 'none';
-   document.getElementById('socialLink').onclick = (e) => {
-     e.preventDefault();
-     let socialList = '聯絡我們 (Contact Links):\n';
-     if(currentProfile.link_line) socialList += `- LINE ID: ${currentProfile.link_line}\n`;
-     if(currentProfile.link_ig) socialList += `- IG: ${currentProfile.link_ig}\n`;
-     if(currentProfile.link_fb) socialList += `- FB: ${currentProfile.link_fb}\n`;
-     if(currentProfile.link_threads) socialList += `- Threads: ${currentProfile.link_threads}\n`;
-     alert(socialList);
-   };
+function applyTheme(profile) {
+  document.getElementById('brandTitle').innerText = profile.brand_name || "STANDALONE";
+  document.title = `${profile.brand_name || 'YOYI'} | AI`;
+  const root = document.documentElement;
+  // 如果資料庫有顏色就用，沒有就用預設綠
+  const color = profile.theme_color || '#00f260';
+  root.style.setProperty('--accent', color);
+  root.style.setProperty('--glow', color);
+  root.style.setProperty('--aurora-1', color);
+  document.getElementById("statusLight").style.backgroundColor = color;
+  document.getElementById("statusLight").style.boxShadow = `0 0 10px ${color}`;
 }
 
-function applyVisualsByColor(color) {
-   const root = document.documentElement;
-   let selectedTheme = null;
-   for (const key in themes) {
-     if (themes[key].color === color) {
-       selectedTheme = themes[key];
-       break;
-     }
-   }
+// 修正後的社群圖標渲染 (支援 LINE ID 判斷)
+function renderSocials(profile) {
+    const deck = document.getElementById('socialDeck'); deck.innerHTML = '';
+    
+    // 定義連結與類型
+    const links = [
+        { icon: 'fas fa-phone', val: profile.link_phone, type: 'tel' },
+        { icon: 'fas fa-envelope', val: profile.link_mail, type: 'mailto' },
+        { icon: 'fab fa-line', val: profile.link_line, type: 'line' },
+        { icon: 'fab fa-instagram', val: profile.link_ig, type: 'ig' },
+        { icon: 'fab fa-facebook-f', val: profile.link_fb, type: 'fb' },
+        { icon: 'fas fa-at', val: profile.link_threads, type: 'threads' }
+    ];
 
-   // 如果找不到主題，使用預設綠色
-   if (!selectedTheme) selectedTheme = themes.pc_repair; 
+    links.forEach(link => {
+        if (link.val) {
+            const a = document.createElement('a'); a.className = 'nav-btn';
+            let href = link.val.trim(); 
+            
+            // 智慧連結轉換
+            if (link.type === 'tel') href = `tel:${href}`;
+            else if (link.type === 'mailto') href = `mailto:${href}`;
+            else if (link.type === 'line') {
+                if (href.startsWith('http')) {} 
+                else if (href.startsWith('@')) href = `https://line.me/R/ti/p/${href}`;
+                else href = `https://line.me/ti/p/~${href}`;
+            }
+            else if (link.type === 'ig' && !href.startsWith('http')) href = `https://www.instagram.com/${href.replace('@', '')}`;
+            else if (link.type === 'fb' && !href.startsWith('http')) href = `https://www.facebook.com/${href}`;
+            else if (link.type === 'threads' && !href.startsWith('http')) href = `https://www.threads.net/@${href.replace('@', '')}`;
+            else if (!href.startsWith('http') && link.type !== 'tel' && link.type !== 'mailto') href = `https://${href}`;
 
-   for (const [k, v] of Object.entries(selectedTheme.vars)) {
-     root.style.setProperty(k, v);
-   }
+            a.href = href; 
+            a.target = '_blank';
+            a.innerHTML = `<i class="${link.icon}"></i>`;
+            deck.appendChild(a);
+        }
+    });
 }
 
-async function loadQnARules() {
-   const { data, error } = await
-supabaseClient.from('qna_rules').select('question, answer').eq('user_id',
-currentUserId).order('created_at', {ascending: false});
-   if (error) throw new Error('無法載入問答規則');
-   qaRules = data;
+// 修正後的按鈕列
+function updateOrbit(faqs) {
+  const bar = document.getElementById("quickActions"); bar.innerHTML = "";
+  const arrow = document.getElementById("scrollArrow");
+
+  if(faqs && faqs.length > 0) {
+    faqs.forEach(item => {
+      const chip = document.createElement("button"); chip.className = "orbit-chip";
+      chip.innerText = item.question;
+      // 點擊事件：呼叫 handleInput
+      chip.onclick = () => handleInput(item.question, item.answer, item.id);
+      bar.appendChild(chip);
+    });
+
+    // 檢查是否需要顯示箭頭
+    setTimeout(() => {
+        if(bar.scrollWidth > bar.clientWidth) arrow.style.display = "flex";
+        else arrow.style.display = "none";
+    }, 100);
+  } else {
+     arrow.style.display = "none";
+  }
 }
 
-function renderQAButtons() {
-   const deck = document.getElementById('qaDeck');
-   deck.innerHTML = '';
-   qaRules.forEach((rule, index) => {
-       const btn = document.createElement('button');
-       btn.className = 'qa-btn';
-       btn.innerText = rule.question;
-       btn.onclick = () => handleUserInput('button', index);
-       deck.appendChild(btn);
-   });
+// 捲動功能
+function scrollMenu() {
+    const bar = document.getElementById("quickActions");
+    bar.scrollBy({ left: 150, behavior: 'smooth' });
+}
+document.getElementById("quickActions").addEventListener("scroll", function() {
+   const bar = this;
+   const arrow = document.getElementById("scrollArrow");
+   if(bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 10) {
+       arrow.style.opacity = "0"; arrow.style.pointerEvents = "none";
+   } else {
+       arrow.style.opacity = "1"; arrow.style.pointerEvents = "auto";
+   }
+});
+
+// ========================================================
+// 互動處理
+// ========================================================
+async function logToCloud(msg, response, type) {
+    if (!CLIENT_ID) return;
+    // 寫入對話紀錄
+    const { error } = await supabaseClient.from('chat_logs').insert([
+        { user_id: CLIENT_ID, message: msg, bot_response: response, type: type }
+    ]);
+    if(error) console.error("Log Error:", error);
 }
 
-async function handleUserInput(type = 'input', ruleIndex = -1) {
-   const chatInput = document.getElementById('chatInput');
-   let userMessage = '';
-   let botResponse = '';
-   const rule = ruleIndex !== -1 ? qaRules[ruleIndex] : null;
-
-   if (type === 'button' && rule) {
-       userMessage = rule.question;
-       botResponse = rule.answer;
-   } else if (type === 'input') {
-       userMessage = chatInput.value.trim();
-       if (userMessage === '') return;
-       
-       // 尋找匹配的 Q&A 規則
-       const matchedRule = qaRules.find(r => userMessage.includes(r.question));
-       if (matchedRule) {
-           botResponse = matchedRule.answer;
-           // 更新點擊數
-           await
-supabaseClient.from('qna_rules').update({ click_count:
-(matchedRule.click_count || 0) + 1 }).eq('question',
-matchedRule.question).eq('user_id', currentUserId);
-       } else {
-           // 預設回應邏輯（可在此處接入 LLM API）
-           botResponse = "很抱歉，我還沒有針對這個問題進行訓練。請嘗試點擊快速提問按鈕。";
-       }
-       chatInput.value = ''; // 清空輸入框
-   } else {
-       return;
-   }
-
-   // 顯示使用者訊息
-   appendMessage(userMessage, 'user');
-
-   // 顯示機器人回應
-   await showBotResponse(botResponse, type, userMessage);
+async function handleInput(q, a, id) {
+  addNode("user", q);
+  showProcessing();
+  
+  // 1. 點擊次數加分 (如果 id 存在)
+  if (id && CLIENT_ID) {
+      // 先讀取目前的 click_count
+      const { data: current } = await supabaseClient.from('qna_rules').select('click_count').eq('id', id).single();
+      if (current) {
+          // 更新 click_count + 1
+          await supabaseClient.from('qna_rules').update({ click_count: (current.click_count || 0) + 1 }).eq('id', id);
+      }
+  }
+  
+  // 2. 寫入 Log (type='button')
+  logToCloud(q, a, 'button'); 
+  
+  setTimeout(() => { removeProcessing(); addNode("bot", a); }, 800);
 }
 
-function appendMessage(text, sender) {
-   const stream = document.getElementById('chatStream');
-   const msgDiv = document.createElement('div');
-   msgDiv.className = sender === 'bot' ? 'bot-msg' : 'user-msg';
-   if (sender === 'bot') {
-       msgDiv.innerHTML = `<div class="bot-text">${text}</div>`;
-   } else {
-       msgDiv.innerText = text;
-   }
-   stream.appendChild(msgDiv);
-   stream.scrollTop = stream.scrollHeight; // 滾動到底部
+function handleSend() {
+  const input = document.getElementById("userInput"); const text = input.value.trim(); if(!text) return;
+  addNode("user", text); input.value = ""; showProcessing();
+  
+  let ans = null; let isFallback = false;
+  // 簡單關鍵字比對
+  if (currentQnA.length > 0) { 
+      for(let f of currentQnA) { 
+          if (f.question && text.includes(f.question)) { ans = f.answer; break; } 
+      } 
+  }
+  // 沒對中，隨機挑選一句 Fallback
+  if (!ans) { 
+      const randomIndex = Math.floor(Math.random() * fallbackMessages.length); 
+      ans = fallbackMessages[randomIndex]; 
+      isFallback = true; 
+  }
+  
+  // 寫入 Log (type='text')
+  logToCloud(text, ans, 'text');
+
+  setTimeout(() => { 
+      removeProcessing(); 
+      if (isFallback) { addNode("sys-msg", ans); } 
+      else { addNode("bot", ans); } 
+  }, 600); 
 }
 
-async function showBotResponse(botResponse, type, userMessage) {
-   const stream = document.getElementById('chatStream');
-   const loadingDiv = document.createElement('div');
-   loadingDiv.className = 'bot-msg';
-   loadingDiv.style.opacity = 0.5;
-   loadingDiv.innerHTML = `<div
-class="loader-bubble"><div
-class="loader-dot"></div><div
-class="loader-dot"></div><div
-class="loader-dot"></div></div>`;
-   stream.appendChild(loadingDiv);
-   stream.scrollTop = stream.scrollHeight;
-
-   await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 500)); // 模擬延遲
-
-   loadingDiv.remove();
-   appendMessage(botResponse, 'bot');
-   
-   // 記錄 Chat Log
-   await
-supabaseClient.from('chat_logs').insert([{
-user_id: currentUserId, message: userMessage, bot_response:
-botResponse, type: type }]);
+function addNode(role, text) {
+  const body = document.getElementById("chatBody"); 
+  const node = document.createElement("div"); 
+  if (role === 'sys-msg') { node.className = `node bot sys-msg`; } 
+  else { node.className = `node ${role}`; }
+  
+  node.innerHTML = `<div class="node-text">${text.replace(/\n/g, '<br>')}</div>`;
+  body.appendChild(node); body.scrollTop = body.scrollHeight;
 }
+
+function showProcessing() { 
+    const body = document.getElementById("chatBody"); 
+    const node = document.createElement("div"); 
+    node.id = "procNode"; node.className = "node bot"; 
+    node.innerHTML = `<div class="node-text" style="opacity:0.6; font-size:12px; letter-spacing:1px;">COMPUTING...</div>`; 
+    body.appendChild(node); body.scrollTop = body.scrollHeight; 
+}
+
+function removeProcessing() { const el = document.getElementById("procNode"); if(el) el.remove(); }
+
+document.getElementById("userInput").addEventListener("keypress", (e) => { if(e.key==="Enter") handleSend(); });
+
+init();
 </script>
 </body>
 </html>
