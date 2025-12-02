@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-<title>STANDALONE OS | User Interface</title>
+<title>YOYI | Digital Twin</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   /* =========================================
-     CORE AESTHETICS (完全保留你的原始設計)
+     CORE AESTHETICS (保留你的原始設計)
      ========================================= */
   :root {
     --accent: #00f260; 
@@ -220,15 +220,14 @@
 <div class="aether-void" id="aetherBg"></div>
 <div class="noise-overlay"></div>
 
-<!-- 開機畫面 -->
+<!-- 開機畫面 - 更新品牌文字 (Steve Jobs Update) -->
 <div class="boot-screen" id="bootLayer">
-  <div class="glitch-text">STANDALONE_OS</div>
-  <div style="margin-top:20px; font-size:12px; color:#666; letter-spacing:1px;" id="bootStatus">核心連線中...</div>
+  <div class="glitch-text">YOYI SYSTEM</div>
+  <div style="margin-top:20px; font-size:12px; color:#666; letter-spacing:1px;" id="bootStatus">CONNECTING DIGITAL TWIN...</div>
 </div>
 
-<!-- 頂部 HUD (Steve Jobs Fix: Added 'notranslate' class and translate="no") -->
+<!-- 頂部 HUD (Translation Fix Included) -->
 <div class="hud-top">
-  <!-- 這是唯一修改的地方：加上 notranslate 與 translate="no" 防止瀏覽器翻譯產生亂碼 -->
   <div class="brand-logo notranslate" translate="no">
     <div class="status-light" id="statusLight"></div>
     <span id="brandTitle">SYSTEM STANDBY</span>
@@ -282,13 +281,13 @@ const fallbackMessages = [
 ];
 
 // ========================================================
-// 初始化
+// 初始化 (Steve Jobs Update: Speed Optimization)
 // ========================================================
 async function init() {
   if (!CLIENT_ID) return;
 
   try {
-    document.getElementById('bootStatus').innerText = "DOWNLOADING PROFILE...";
+    document.getElementById('bootStatus').innerText = "SYNCING DATA...";
     
     // 讀取設定
     const { data: profile, error: err1 } = await supabaseClient.from('profiles').select('*').eq('id', CLIENT_ID).single();
@@ -302,14 +301,16 @@ async function init() {
     renderSocials(profile);
     updateOrbit(currentQnA);
 
+    // [SPEED FIX] 加快進入速度
     setTimeout(() => {
         document.getElementById("bootLayer").style.opacity = 0;
-        setTimeout(()=> document.getElementById("bootLayer").style.display = "none", 1000);
+        // 縮短轉場等待
+        setTimeout(()=> document.getElementById("bootLayer").style.display = "none", 500);
         setTimeout(() => { 
             // 如果有歡迎語就用歡迎語，沒有就用預設
             addNode("bot", profile.welcome_msg || "SYSTEM READY."); 
-        }, 500);
-    }, 1500);
+        }, 300); // 縮短歡迎語延遲
+    }, 800); // 縮短初始等待 (原 1500)
 
   } catch (e) {
     console.error(e);
