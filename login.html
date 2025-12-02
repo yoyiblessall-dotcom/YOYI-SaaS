@@ -10,7 +10,7 @@
 
 <style>
   /* =========================================
-     CORE AESTHETICS (保留你的原本設計)
+     CORE AESTHETICS (完全保留你的原始設計)
      ========================================= */
   :root {
     --accent: #00f260; 
@@ -226,9 +226,10 @@
   <div style="margin-top:20px; font-size:12px; color:#666; letter-spacing:1px;" id="bootStatus">核心連線中...</div>
 </div>
 
-<!-- 頂部 HUD -->
+<!-- 頂部 HUD (Steve Jobs Fix: Added 'notranslate' class and translate="no") -->
 <div class="hud-top">
-  <div class="brand-logo">
+  <!-- 這是唯一修改的地方：加上 notranslate 與 translate="no" 防止瀏覽器翻譯產生亂碼 -->
+  <div class="brand-logo notranslate" translate="no">
     <div class="status-light" id="statusLight"></div>
     <span id="brandTitle">SYSTEM STANDBY</span>
   </div>
